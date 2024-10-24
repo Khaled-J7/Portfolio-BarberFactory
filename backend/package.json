@@ -11,7 +11,6 @@
     "mongoose": "^8.1.0",
     "dotenv": "^16.3.1",
     "cors": "^2.8.5",
-    "socket.io": "^4.7.4",
     "jsonwebtoken": "^9.0.2",
     "bcryptjs": "^2.4.3"
   },
