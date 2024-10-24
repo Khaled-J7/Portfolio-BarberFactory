@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "expo-font": "~11.10.3",
-    "react-native-reanimated": "^3.16.1"
-  }
-}
