@@ -42,7 +42,7 @@ const SplashScreen = ({ navigation }) => {
 
     // Navigate to main screen after animations
     const timer = setTimeout(() => {
-      navigation.replace('Login'); // Replace with your auth screen name
+      navigation.replace('Login'); // Replace with auth screen name
     }, 4000);
 
     return () => clearTimeout(timer);
