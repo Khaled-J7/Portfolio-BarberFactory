@@ -1,19 +1,22 @@
-// Import required dependencies
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-// Create Express app
 const app = express();
 
-// Middleware
-app.use(cors());  // Enable CORS for all routes
-app.use(express.json());  // Parse JSON bodies
+// CORS configuration
+app.use(cors({
+  origin: '*',  // In development, allow all origins
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
-// Basic test route
+app.use(express.json());
+
+// Test route
 app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to BarberFactory API' });
+  res.json({ message: 'Backend is running!' });
 });
 
 // Routes
@@ -24,9 +27,8 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
-// Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
   console.log(`Test the API at http://localhost:${PORT}`);
 });

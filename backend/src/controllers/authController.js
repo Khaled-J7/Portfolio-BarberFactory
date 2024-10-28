@@ -14,6 +14,7 @@ const authController = {
   // Register new user
   register: async (req, res) => {
     try {
+      console.log('Register request received:', req.body); // Debug log 
       const { fullName, phoneNumber, password } = req.body;
 
       // Check if user already exists
@@ -66,6 +67,7 @@ const authController = {
       // Generate token
       const token = generateToken(user._id);
 
+      console.log('Registration successful for:', fullName); // Debug log
       res.json({
         token,
         user: {
