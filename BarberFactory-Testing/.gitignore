@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Testing artifacts
+coverage/
+.nyc_output/
+
+# Environment variables
+.env
+
+# IDE files
+.idea/
+.vscode/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

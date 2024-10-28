@@ -1,0 +1,16 @@
+{
+    "name": "barberfactory-backend-tests",
+    "version": "1.0.0",
+    "scripts": {
+      "test": "jest",
+      "test:watch": "jest --watch",
+      "test:auth": "jest auth/",
+      "test:appointments": "jest appointments/",
+      "test:profiles": "jest profiles/"
+    },
+    "dependencies": {
+      "jest": "^29.7.0",
+      "supertest": "^6.3.3",
+      "mongodb-memory-server": "^9.1.1"
+    }
+  }

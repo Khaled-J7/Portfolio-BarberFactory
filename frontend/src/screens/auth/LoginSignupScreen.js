@@ -10,21 +10,17 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
-import * as Font from 'expo-font'; // Importing Font API from Expo to load custom fonts
+import * as Font from 'expo-font';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import authService from '../../services/authService';
 
-// Function to load custom fonts (BebasNeue and Poppins)
-const loadFonts = async () => {
-  await Font.loadAsync({
-    'BebasNeue-Regular': require('../../assets/fonts/BebasNeue-Regular.ttf'),
-    'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
-    'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf'),
-  });
-};
-
-// Main functional component for the login/signup screen
 const LoginSignupScreen = ({ navigation }) => {
-  const [isLogin, setIsLogin] = useState(true); // State to toggle between login and signup modes
+  // State management
+  const [isLogin, setIsLogin] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     fullName: '',
     phoneNumber: '',
@@ -33,27 +29,102 @@ const LoginSignupScreen = ({ navigation }) => {
   });
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
-  // Load fonts when the component mounts
+  // Load custom fonts when component mounts
   React.useEffect(() => {
     loadFonts().then(() => setFontsLoaded(true));
   }, []);
 
-  // If fonts are not yet loaded, show a loading spinner
-  if (!fontsLoaded) {
-    return <ActivityIndicator size="large" color="#0000ff" />; // Loading spinner
-  }
+  // Function to load custom fonts
+  const loadFonts = async () => {
+    await Font.loadAsync({
+      'BebasNeue-Regular': require('../../assets/fonts/BebasNeue-Regular.ttf'),
+      'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
+      'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf'),
+    });
+  };
+
+  // Form validation function
+  const validateForm = () => {
+    // Reset any previous errors
+    setError('');
+
+    // Common validation for both login and signup
+    if (!formData.phoneNumber || !formData.password) {
+      setError('Phone number and password are required');
+      return false;
+    }
+
+    // Additional validation for signup
+    if (!isLogin) {
+      if (!formData.fullName) {
+        setError('Full name is required');
+        return false;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        setError('Passwords do not match');
+        return false;
+      }
+      if (formData.password.length < 6) {
+        setError('Password must be at least 6 characters');
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  // Handle form submission (login/signup)
+  const handleSubmit = async () => {
+    try {
+      // Validate form
+      if (!validateForm()) return;
+
+      setLoading(true);
+      let response;
+
+      if (isLogin) {
+        // Handle login
+        response = await authService.login({
+          phoneNumber: formData.phoneNumber,
+          password: formData.password,
+        });
+      } else {
+        // Handle signup
+        response = await authService.register({
+          fullName: formData.fullName,
+          phoneNumber: formData.phoneNumber,
+          password: formData.password,
+        });
+      }
+
+      // Store user data and token
+      await AsyncStorage.setItem('userToken', response.token);
+      await AsyncStorage.setItem('userData', JSON.stringify(response.user));
+
+      // Navigate to Home screen
+      navigation.replace('Home');
+    } catch (error) {
+      setError(error.message || 'Something went wrong');
+      Alert.alert('Error', error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle skip functionality
+  const handleSkip = () => {
+    navigation.replace('Home');
+  };
 
   // Toggle between login and signup modes
   const toggleMode = () => setIsLogin(!isLogin);
 
-  const handleSkip = () => {
-    navigation.navigate('Home'); // Navigate to HomeScreen
-  };
+  // Show loading spinner while fonts are loading
+  if (!fontsLoaded) {
+    return <ActivityIndicator size="large" color="#262525" />;
+  }
 
-  const handleSubmit = () => {
-    navigation.navigate('Home'); // For now, just navigate to HomeScreen
-  };
-  // Renders the login form (fields for phone number and password)
+  // Render login form fields
   const renderLoginForm = () => (
     <>
       <Text style={styles.inputLabel}>Phone Number</Text>
@@ -76,7 +147,8 @@ const LoginSignupScreen = ({ navigation }) => {
       />
     </>
   );
-  // Renders the signup form (includes full name, phone number, password, and confirm password)
+
+  // Render signup form fields
   const renderSignupForm = () => (
     <>
       <Text style={styles.inputLabel}>Full Name</Text>
@@ -99,26 +171,45 @@ const LoginSignupScreen = ({ navigation }) => {
       />
     </>
   );
-  // Main render method
+
+  // Main render
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Image
-          source={require('../../assets/att.Fr_9jx6reYE_J213nNP70xO5ko-eXzdnnHv8v7NMcgo-removebg-preview-removebg-preview.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
+      <Image
+        source={require('../../assets/images/appLogo.png')}
+        style={styles.logo}
+        resizeMode="contain"
+      />
+        
         <Text style={styles.title}>{isLogin ? 'LOGIN' : 'SIGN UP'}</Text>
+        
         <View style={styles.formContainer}>
+          {/* Show error message if exists */}
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          
+          {/* Render appropriate form based on mode */}
           {isLogin ? renderLoginForm() : renderSignupForm()}
-          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-            <Text style={styles.submitButtonText}>
-              {isLogin ? 'Login' : 'Sign Up'}
-            </Text>
+
+          {/* Submit button with loading state */}
+          <TouchableOpacity 
+            style={styles.submitButton} 
+            onPress={handleSubmit}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.submitButtonText}>
+                {isLogin ? 'Login' : 'Sign Up'}
+              </Text>
+            )}
           </TouchableOpacity>
+
+          {/* Toggle between login and signup */}
           <TouchableOpacity onPress={toggleMode}>
             <Text style={styles.toggleText}>
               {isLogin 
@@ -126,6 +217,8 @@ const LoginSignupScreen = ({ navigation }) => {
                 : "Already have an account? Login"}
             </Text>
           </TouchableOpacity>
+
+          {/* Skip option */}
           <TouchableOpacity onPress={handleSkip}>
             <Text style={styles.skipText}>Skip for later</Text>
           </TouchableOpacity>
@@ -151,7 +244,7 @@ const styles = StyleSheet.create({
     marginTop: 50,
   },
   title: {
-    fontFamily: 'BebasNeue-Regular', // Use BebasNeue for titles
+    fontFamily: 'BebasNeue-Regular',
     fontSize: 60, 
     color: '#262525',
     textAlign: 'center',
@@ -163,7 +256,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   inputLabel: {
-    fontFamily: 'Poppins-Bold', // Poppins Bold for labels
+    fontFamily: 'Poppins-Bold',
     fontSize: 16,
     color: '#262525',
     marginBottom: 8,
@@ -174,7 +267,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 15,
     fontSize: 16,
-    fontFamily: 'Poppins-Regular', // Poppins Regular for inputs
+    fontFamily: 'Poppins-Regular',
     color: '#262525',
     shadowColor: '#000',
     shadowOffset: {
@@ -200,13 +293,13 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   submitButtonText: {
-    fontFamily: 'Poppins-Bold', // Poppins Bold for button text
+    fontFamily: 'Poppins-Bold',
     color: '#FFFFFF',
     fontSize: 20,
     textAlign: 'center',
   },
   toggleText: {
-    fontFamily: 'Poppins-Regular', // Poppins Regular for toggle text
+    fontFamily: 'Poppins-Regular',
     color: '#262525',
     fontSize: 16,
     textAlign: 'center',
@@ -214,12 +307,19 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   skipText: {
-    fontFamily: 'Poppins-Regular', // Poppins Regular for skip text
+    fontFamily: 'Poppins-Regular',
     color: '#262525',
     fontSize: 14,
     textAlign: 'center',
     marginTop: 15,
     opacity: 0.8,
+  },
+  errorText: {
+    fontFamily: 'Poppins-Regular',
+    color: '#FF0000',
+    textAlign: 'center',
+    marginVertical: 10,
+    fontSize: 14,
   },
 });
 

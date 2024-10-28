@@ -31,18 +31,18 @@ const SplashScreen = ({ navigation }) => {
       })
     );
 
-    // Animate the underline
+    // Animate the underline using bezier instead of bezierCubic
     lineWidth.value = withDelay(
       1500, // Start after title appears
       withTiming(width * 0.7, {
         duration: 1500,
-        easing: Easing.bezierCubic(0.4, 0, 0.2, 1),
+        easing: Easing.bezier(0.4, 0, 0.2, 1), // Changed from bezierCubic to bezier
       })
     );
 
     // Navigate to main screen after animations
     const timer = setTimeout(() => {
-      navigation.replace('Login'); // Replace with auth screen name
+      navigation.replace('LoginSignup');
     }, 4000);
 
     return () => clearTimeout(timer);
@@ -65,12 +65,9 @@ const SplashScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.contentContainer}>
-        {/* Animated title */}
         <Animated.Text style={[styles.title, titleStyle]}>
           BarberFactory
         </Animated.Text>
-        
-        {/* Animated underline */}
         <Animated.View style={[styles.underline, lineStyle]} />
       </View>
     </View>
@@ -89,7 +86,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: 'BebasNeue_400Regular',
-    fontSize: 48,
+    fontSize: 60,
     color: '#2ECC71',
     marginBottom: 10,
   },
@@ -97,8 +94,7 @@ const styles = StyleSheet.create({
     height: 2,
     backgroundColor: '#2ECC71',
     borderRadius: 2,
-    transform: [{ translateY: -5 }], // Adjust line position
-    // Add subtle shadow for signature-like effect
+    transform: [{ translateY: -5 }],
     shadowColor: '#2ECC71',
     shadowOffset: {
       width: 0,
