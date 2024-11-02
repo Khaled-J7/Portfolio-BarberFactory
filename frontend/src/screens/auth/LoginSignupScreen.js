@@ -81,6 +81,37 @@ const RegularInput = ({ label, placeholder, value, onChangeText, keyboardType })
   </>
 );
 
+const RoleSelector = ({ selectedRole, onRoleChange }) => (
+  <View style={styles.roleSelectorContainer}>
+    <Text style={styles.inputLabel}>I am a:</Text>
+    <View style={styles.roleOptionsContainer}>
+      <TouchableOpacity 
+        style={[
+          styles.roleOption, 
+          selectedRole === 'client' && styles.roleOptionSelected
+        ]}
+        onPress={() => onRoleChange('client')}
+      >
+        <Text style={[
+          styles.roleOptionText,
+          selectedRole === 'client' && styles.roleOptionTextSelected
+        ]}>Client</Text>
+      </TouchableOpacity>
+      <TouchableOpacity 
+        style={[
+          styles.roleOption, 
+          selectedRole === 'barber' && styles.roleOptionSelected
+        ]}
+        onPress={() => onRoleChange('barber')}
+      >
+        <Text style={[
+          styles.roleOptionText,
+          selectedRole === 'barber' && styles.roleOptionTextSelected
+        ]}>Barber</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+);
 /**
  * Success Modal Component
  * Shows after successful signup
@@ -124,6 +155,7 @@ const LoginSignupScreen = ({ navigation }) => {
     phoneNumber: '',
     password: '',
     confirmPassword: '',
+    role: 'client', // default to client
   });
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
@@ -155,6 +187,10 @@ const LoginSignupScreen = ({ navigation }) => {
     if (!isLogin) {
       if (!formData.fullName) {
         setError('Full name is required');
+        return false;
+      }
+      if (!formData.role) {
+        setError('Please select your role');
         return false;
       }
       if (formData.password !== formData.confirmPassword) {
@@ -193,6 +229,7 @@ const LoginSignupScreen = ({ navigation }) => {
           fullName: formData.fullName,
           phoneNumber: formData.phoneNumber,
           password: formData.password,
+          isBarber: formData.role === 'barber' // Convert role to boolean
         });
         await AsyncStorage.setItem('userToken', response.token);
         await AsyncStorage.setItem('userData', JSON.stringify(response.user));
@@ -240,6 +277,10 @@ const LoginSignupScreen = ({ navigation }) => {
         value={formData.phoneNumber}
         onChangeText={(text) => setFormData({ ...formData, phoneNumber: text })}
         keyboardType="phone-pad"
+      />
+      <RoleSelector
+      selectedRole={formData.role}
+      onRoleChange={(role) => setFormData({ ...formData, role })}
       />
       <PasswordInput
         label="Password"
@@ -469,6 +510,45 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Bold',
     color: 'white',
     fontSize: 16,
+  },
+  // Role Selecting Styles
+  roleSelectorContainer: {
+    marginVertical: 15,
+  },
+  roleOptionsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  roleOption: {
+    flex: 1,
+    marginHorizontal: 5,
+    padding: 15,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  roleOptionSelected: {
+    borderColor: '#262525',
+    backgroundColor: '#262525',
+  },
+  roleOptionText: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: 16,
+    color: '#262525',
+  },
+  roleOptionTextSelected: {
+    color: '#FFFFFF',
   },
 });
 
