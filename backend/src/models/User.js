@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema({
   },
   isBarber: {
     type: Boolean,
+    default: false
   }
 }, { timestamps: true });
 
