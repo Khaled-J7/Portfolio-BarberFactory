@@ -1,55 +1,122 @@
+// BottomNavigationBar.js
 import React from 'react';
-import { View, Pressable, StyleSheet } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useRoute } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Feather } from '@expo/vector-icons'; // Using Expo icons instead of lucide-react
 
-const BottomNavigationBar = ({ navigation, activeTab = 'Home' }) => {
-  const tabs = [
-    { name: 'Explore', icon: 'compass' },
-    { name: 'Profile', icon: 'account-circle' },
-    { name: 'Home', icon: 'home-circle' },
-    { name: 'Appointments', icon: 'calendar' }
+const BottomNavigationBar = ({ navigation }) => {
+  const [isBarber, setIsBarber] = React.useState(false);
+  const route = useRoute();
+
+  // Fetch user role on component mount
+  React.useEffect(() => {
+    const getUserRole = async () => {
+      try {
+        const userData = await AsyncStorage.getItem('userData');
+        if (userData) {
+          const { isBarber } = JSON.parse(userData);
+          setIsBarber(isBarber);
+        }
+      } catch (error) {
+        console.error('Error fetching user role:', error);
+      }
+    };
+    getUserRole();
+  }, []);
+
+  // Navigation items with Feather icons
+  const navItems = [
+    {
+      name: 'Explore',
+      iconName: 'search',
+      route: 'Explore'
+    },
+    {
+      name: 'Home',
+      iconName: 'home',
+      route: 'Home'
+    },
+    {
+      name: 'Appointments',
+      iconName: 'calendar',
+      route: 'Appointments'
+    },
+    {
+      name: isBarber ? 'Store' : 'Profile',
+      iconName: isBarber ? 'shopping-bag' : 'user',
+      route: isBarber ? 'Store' : 'Profile'
+    }
   ];
 
   return (
-    <View style={styles.tabBar}>
-      {tabs.map((tab) => (
-        <Pressable
-          key={tab.name}
-          onPress={() => navigation.navigate(tab.name)}
-          style={styles.tabBarItem}
-        >
-          <Icon
-            name={tab.icon}
-            size={30}
-            color={activeTab === tab.name ? '#2ECC71' : '#F5F7F8'}
-          />
-        </Pressable>
-      ))}
+    <View style={styles.container}>
+      {navItems.map((item) => {
+        const isActive = route.name === item.route;
+        return (
+          <TouchableOpacity
+            key={item.name}
+            style={styles.tabContainer}
+            onPress={() => navigation.navigate(item.route)}
+          >
+            <Feather
+              name={item.iconName}
+              size={24}
+              color={isActive ? '#2ECC71' : '#262525'}
+              style={styles.icon}
+            />
+            <Text
+              style={[
+                styles.tabText,
+                isActive && styles.activeTabText
+              ]}
+            >
+              {item.name}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  tabBar: {
+  container: {
     flexDirection: 'row',
-    height: 70,
-    backgroundColor: '#3C3D37',
-    borderTopWidth: 0,
-    elevation: 15,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    overflow: 'hidden',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-  },
-  tabBarItem: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
     paddingVertical: 10,
-  }
+    paddingHorizontal: 20,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#E5E5E5',
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  tabContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+  },
+  icon: {
+    marginBottom: 4,
+  },
+  tabText: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 12,
+    color: '#262525',
+    marginTop: 2,
+  },
+  activeTabText: {
+    color: '#2ECC71',
+    fontFamily: 'Poppins-Bold',
+  },
 });
 
 export default BottomNavigationBar;
