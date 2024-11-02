@@ -27,10 +27,10 @@ const authController = {
    */
   register: async (req, res) => {
     try {
-      const { fullName, phoneNumber, password } = req.body;
+      const { fullName, phoneNumber, password, isBarber } = req.body;
 
       // DEBUG: Log registration attempt
-      console.log('Registration attempt:', { fullName, phoneNumber });
+      console.log('Registration attempt:', { fullName, phoneNumber, isBarber  });
 
       // Check for existing user
       const userExists = await User.findOne({ phoneNumber });
@@ -44,14 +44,15 @@ const authController = {
       const user = await User.create({
         fullName,
         phoneNumber,
-        password // Will be hashed by mongoose pre-save middleware
+        password, // Will be hashed by mongoose pre-save middleware
+        isBarber: Boolean(isBarber) // To ensure Boolean value 
       });
 
       // Generate token
       const token = generateToken(user._id);
 
       // DEBUG: Log successful registration
-      console.log('User registered successfully:', user._id);
+      console.log('User registered successfully:', user._id, 'isBarber:', user.isBarber);
 
       // Send response
       res.status(201).json({
