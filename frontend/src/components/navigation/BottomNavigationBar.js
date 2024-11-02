@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     backgroundColor: '#FFFFFF',
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 20,
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -98,20 +98,26 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 3,
+    height: 65,
   },
   tabContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     flex: 1,
+    height: '100%', // Ensure full height usage
+    paddingVertical: 2, // Small padding for better spacing
   },
   icon: {
+    height: 24,
     marginBottom: 4,
   },
   tabText: {
     fontFamily: 'Poppins-Regular',
-    fontSize: 12,
+    fontSize: 11,
     color: '#262525',
-    marginTop: 2,
+    textAlign: 'center', // Ensure text centering
+    includeFontPadding: false, // Remove extra font padding
+    lineHeight: 16, // Consistent line height
   },
   activeTabText: {
     color: '#2ECC71',

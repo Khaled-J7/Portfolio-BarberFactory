@@ -17,11 +17,15 @@
       "ios": {
         "supportsTablet": true
       },
+      "updates": {
+      "fallbackToCacheTimeout": 0
+      },
       "android": {
         "adaptiveIcon": {
           "foregroundImage": "./src/assets/images/appLogo.png",
           "backgroundColor": "#262525"
-        }
+        },
+        "softwareKeyboardLayoutMode": "pan"
       },
       "plugins": [
         "expo-font"
