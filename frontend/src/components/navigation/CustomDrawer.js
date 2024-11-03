@@ -1,148 +1,119 @@
-// src/components/navigation/CustomDrawer.js
-import React from 'react';
+// src/screens/main/HomeScreen.js
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
+  SafeAreaView,
   TouchableOpacity,
-  Dimensions,
-  Platform
+  Image,
+  Platform,
+  StatusBar,
+  ScrollView,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Constants from 'expo-constants';
+import BottomNavigationBar from '../../components/navigation/BottomNavigationBar';
+import CustomDrawer from '../../components/navigation/CustomDrawer';
 
-const { width } = Dimensions.get('window');
-const DRAWER_WIDTH = width * 0.75;
+const HomeScreen = ({ navigation }) => {
+  const [isDrawerVisible, setIsDrawerVisible] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
-const CustomDrawer = ({ isVisible, onClose, navigation }) => {
-  if (!isVisible) return null;
+  useEffect(() => {
+    // Immediately set ready to true to prevent delay
+    setIsReady(true);
+  }, []);
 
-  const handleLogout = async () => {
-    try {
-      await AsyncStorage.clear();
-      onClose();
-      navigation.replace('LoginSignup');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
+  const renderContent = () => (
+    <>
+      <StatusBar barStyle="dark-content" />
 
-  const menuItems = [
-    { 
-      icon: 'settings', 
-      label: 'Settings',
-      onPress: () => {
-        onClose();
-        navigation.navigate('Settings');
-      }
-    },
-    { 
-      icon: 'info', 
-      label: 'About Us',
-      onPress: () => {
-        onClose();
-        console.log('About Us pressed');
-      }
-    },
-    { 
-      icon: 'log-out', 
-      label: 'Log Out',
-      onPress: handleLogout
-    }
-  ];
+      {/* Top Bar */}
+      <View style={styles.topBar}>
+        <TouchableOpacity
+          onPress={() => setIsDrawerVisible(true)}
+        >
+          <Feather name="list" size={24} color="#262525" />
+        </TouchableOpacity>
+
+        <TouchableOpacity>
+          <Feather name="home" size={24} color="#262525" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Logo */}
+      <View style={styles.logoContainer}>
+        <Image
+          source={require('../../assets/images/appLogo.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+      </View>
+
+      {/* Title */}
+      <Text style={styles.title}>Discover nearby Barbershops</Text>
+
+      {/* Content Area */}
+      <ScrollView 
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Barbershop cards will be added here */}
+      </ScrollView>
+
+      {/* Bottom Navigation */}
+      <BottomNavigationBar navigation={navigation} />
+
+      {/* Drawer */}
+      <CustomDrawer
+        isVisible={isDrawerVisible}
+        onClose={() => setIsDrawerVisible(false)}
+        navigation={navigation}
+      />
+    </>
+  );
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity 
-        style={styles.overlay}
-        activeOpacity={1}
-        onPress={onClose}
-      >
-        <View style={styles.overlayBackground} />
-      </TouchableOpacity>
-      
-      <View style={styles.drawer}>
-        {menuItems.map((item, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.menuItem,
-              index === menuItems.length - 1 && styles.lastMenuItem
-            ]}
-            onPress={item.onPress}
-          >
-            <View style={styles.menuItemContent}>
-              <Feather name={item.icon} size={24} color="#262525" />
-              <Text style={styles.menuItemText}>{item.label}</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
-
-        <View style={styles.versionContainer}>
-          <Text style={styles.versionText}>
-            Version {Constants.expoConfig?.version || '1.0.0'}
-          </Text>
-        </View>
-      </View>
-    </View>
+    <SafeAreaView style={styles.container}>
+      {renderContent()}
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 1000,
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  overlayBackground: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: '#FFFFFF',
   },
-  drawer: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: DRAWER_WIDTH,
-    backgroundColor: '#C0EBA6',
-    paddingTop: Platform.OS === 'ios' ? 50 : 30,
-    paddingHorizontal: 20,
-  },
-  menuItem: {
-    marginBottom: 15,
-    paddingVertical: 12,
-  },
-  lastMenuItem: {
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0, 0, 0, 0.1)',
-    paddingTop: 20,
-    marginTop: 10,
-  },
-  menuItemContent: {
+  topBar: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    height: Platform.OS === 'ios' ? 90 : 60,
   },
-  menuItemText: {
-    marginLeft: 15,
-    fontFamily: 'Poppins-Regular',
-    fontSize: 16,
-    color: '#262525',
-  },
-  versionContainer: {
-    position: 'absolute',
-    bottom: 30,
-    left: 0,
-    right: 0,
+  logoContainer: {
     alignItems: 'center',
+    marginVertical: 20,
   },
-  versionText: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: 14,
+  logo: {
+    width: 150,
+    height: 150,
+  },
+  title: {
+    fontFamily: 'BebasNeue-Regular',
+    fontSize: 32,
     color: '#262525',
+    textAlign: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
   },
 });
 
-export default CustomDrawer;
+export default HomeScreen;

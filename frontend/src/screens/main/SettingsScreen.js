@@ -22,14 +22,9 @@ const SettingsScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity 
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Feather name="arrow-left" size={24} color="#262525" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Settings</Text>
-        <View style={styles.headerRight} />
       </View>
 
       <View style={styles.content}>
@@ -101,29 +96,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-    height: Platform.OS === "ios" ? 90 : 60,
-  },
-  headerTitle: {
-    fontFamily: "Poppins-Bold",
-    fontSize: 22,
-    color: "#262525",
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerRight: {
-    width: 40, // Same width as back button for balance
+    paddingVertical: 15,
+    height: 60,
+    justifyContent: 'center',
   },
   content: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 20,
-    marginTop: 40, // Added to push content down
+    paddingTop: 10,
   },
   settingItem: {
     flexDirection: "row",
@@ -135,10 +116,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     marginBottom: 15,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 3,

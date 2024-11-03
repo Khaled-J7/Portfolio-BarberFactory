@@ -1,5 +1,5 @@
 // src/screens/main/HomeScreen.js
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,37 +9,34 @@ import {
   Image,
   Platform,
   StatusBar,
-  ScrollView,
-} from "react-native";
-import { Feather } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import BottomNavigationBar from "../../components/navigation/BottomNavigationBar";
-import CustomDrawer from "../../components/navigation/CustomDrawer";
+  ScrollView
+} from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import BottomNavigationBar from '../../components/navigation/BottomNavigationBar';
+import CustomDrawer from '../../components/navigation/CustomDrawer';
+
+// Debug
+console.log("This is HomeScreen Debug test");
 
 const HomeScreen = ({ navigation }) => {
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
-  const [userType, setUserType] = useState("client"); // 'client' or 'barber'
+  const [userType, setUserType] = useState('client');
 
-  // Fetch user type on component mount
   React.useEffect(() => {
     const getUserType = async () => {
       try {
-        const userData = await AsyncStorage.getItem("userData");
+        const userData = await AsyncStorage.getItem('userData');
         if (userData) {
           const { isBarber } = JSON.parse(userData);
-          setUserType(isBarber ? "barber" : "client");
+          setUserType(isBarber ? 'barber' : 'client');
         }
       } catch (error) {
-        console.error("Error fetching user type:", error);
+        console.error('Error fetching user type:', error);
       }
     };
     getUserType();
   }, []);
-
-  const handleSearchPress = () => {
-    // Will implement search functionality later
-    console.log("Search pressed");
-  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -47,28 +44,23 @@ const HomeScreen = ({ navigation }) => {
 
       {/* Top Bar */}
       <View style={styles.topBar}>
+        {/* Left Menu Button */}
         <TouchableOpacity
           onPress={() => setIsDrawerVisible(true)}
-          style={styles.menuButton}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} // Better touch area
         >
-          <Feather
-            name="list"
-            size={24}
-            color="#262525"
-            style={styles.menuIcon}
-          />
+          <Feather name="menu" size={25} color="#262525" />
         </TouchableOpacity>
 
+        {/* Right Home Button */}
         <TouchableOpacity>
-          <Feather name="home" size={24} color="#262525" />
+          <Feather name="home" size={25} color="#262525" />
         </TouchableOpacity>
       </View>
 
       {/* Logo */}
       <View style={styles.logoContainer}>
         <Image
-          source={require("../../assets/images/appLogo.png")}
+          source={require('../../assets/images/appLogo.png')}
           style={styles.logo}
           resizeMode="contain"
         />
@@ -77,8 +69,11 @@ const HomeScreen = ({ navigation }) => {
       {/* Title */}
       <Text style={styles.title}>Discover nearby Barbershops</Text>
 
-      {/* Content Area - Will be populated with barbershop cards */}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      {/* Content Area */}
+      <ScrollView 
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Barbershop cards will be added here */}
       </ScrollView>
 
@@ -98,21 +93,31 @@ const HomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#FFFFFF',
   },
   topBar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-    height: Platform.OS === "ios" ? 90 : 60,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    height: Platform.OS === 'ios' ? 90 : 60,
   },
-  menuButton: {
-    padding: 8,
+  iconButton: {
+    padding: 10,
+    backgroundColor: '#F8F8F8', // Light background for visibility
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
   logoContainer: {
-    alignItems: "center",
+    alignItems: 'center',
     marginVertical: 20,
   },
   logo: {
@@ -120,23 +125,16 @@ const styles = StyleSheet.create({
     height: 150,
   },
   title: {
-    fontFamily: "BebasNeue-Regular",
+    fontFamily: 'BebasNeue-Regular',
     fontSize: 32,
-    color: "#262525",
-    textAlign: "center",
+    color: '#262525',
+    textAlign: 'center',
     paddingHorizontal: 20,
     marginBottom: 20,
   },
   content: {
     flex: 1,
     paddingHorizontal: 20,
-  },
-  menuButton: {
-    padding: 8,
-    backgroundColor: "transparent", // Ensure transparency
-  },
-  menuIcon: {
-    opacity: 1, // Ensure visibility
   },
 });
 

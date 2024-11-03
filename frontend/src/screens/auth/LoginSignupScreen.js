@@ -367,7 +367,7 @@ const LoginSignupScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#2ECC71',
+    backgroundColor: '#C0EBA6',
   },
   scrollContent: {
     flexGrow: 1,
