@@ -1,5 +1,5 @@
 // src/screens/main/HomeScreen.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BottomNavigationBar from '../../components/navigation/BottomNavigationBar';
 import CustomDrawer from '../../components/navigation/CustomDrawer';
+import BarbershopCard from '../../components/ui/BarbershopCard';
 
 // Debug
 console.log("This is HomeScreen Debug test");
@@ -22,8 +23,9 @@ console.log("This is HomeScreen Debug test");
 const HomeScreen = ({ navigation }) => {
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const [userType, setUserType] = useState('client');
+  const [barbershops, setBarbershops] = useState([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const getUserType = async () => {
       try {
         const userData = await AsyncStorage.getItem('userData');
@@ -38,22 +40,25 @@ const HomeScreen = ({ navigation }) => {
     getUserType();
   }, []);
 
+  const handleBookPress = (shopId) => {
+    // Will be implemented when we create the booking system
+    console.log('Booking pressed for shop:', shopId);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
 
       {/* Top Bar */}
       <View style={styles.topBar}>
-        {/* Left Menu Button */}
         <TouchableOpacity
           onPress={() => setIsDrawerVisible(true)}
         >
-          <Feather name="menu" size={25} color="#262525" />
+          <Feather name="list" size={24} color="#262525" />
         </TouchableOpacity>
 
-        {/* Right Home Button */}
         <TouchableOpacity>
-          <Feather name="home" size={25} color="#262525" />
+          <Feather name="home" size={24} color="#262525" />
         </TouchableOpacity>
       </View>
 
@@ -69,12 +74,29 @@ const HomeScreen = ({ navigation }) => {
       {/* Title */}
       <Text style={styles.title}>Discover nearby Barbershops</Text>
 
-      {/* Content Area */}
+      {/* Barbershops List */}
       <ScrollView 
         style={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* Barbershop cards will be added here */}
+        {barbershops.length > 0 ? (
+          barbershops.map((shop) => (
+            <BarbershopCard
+              key={shop.id}
+              shopName={shop.name}
+              address={shop.address}
+              phone={shop.phone}
+              imageUrl={shop.imageUrl}
+              onBookPress={() => handleBookPress(shop.id)}
+            />
+          ))
+        ) : (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>
+              No barbershops available yet.
+            </Text>
+          </View>
+        )}
       </ScrollView>
 
       {/* Bottom Navigation */}
@@ -135,6 +157,18 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 50,
+  },
+  emptyText: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 16,
+    color: '#666666',
+    textAlign: 'center',
   },
 });
 
