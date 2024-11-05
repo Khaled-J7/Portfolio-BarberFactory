@@ -225,6 +225,7 @@ const LoginSignupScreen = ({ navigation }) => {
         await AsyncStorage.setItem('userData', JSON.stringify(response.user));
         navigation.replace('Home');
       } else {
+        // Registration
         response = await authService.register({
           fullName: formData.fullName,
           phoneNumber: formData.phoneNumber,
@@ -233,7 +234,18 @@ const LoginSignupScreen = ({ navigation }) => {
         });
         await AsyncStorage.setItem('userToken', response.token);
         await AsyncStorage.setItem('userData', JSON.stringify(response.user));
+        
+        // Show success modal for both client and barber
         setShowSuccessModal(true);
+        
+        // In the onClose of success modal, handle navigation based on role
+        if (formData.role === 'barber') {
+          // This navigation will happen after success modal is closed
+          navigation.replace('WelcomeBarber');
+        } else {
+          // This navigation will happen after success modal is closed
+          navigation.replace('Home');
+        }
       }
     } catch (error) {
       setError(error.message || 'Something went wrong');
@@ -242,7 +254,6 @@ const LoginSignupScreen = ({ navigation }) => {
       setLoading(false);
     }
   };
-
   // Render login form
   const renderLoginForm = () => (
     <>
