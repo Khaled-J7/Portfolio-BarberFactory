@@ -19,8 +19,8 @@ const WelcomeBarberScreen = ({ navigation }) => {
   const buttonOpacity = useRef(new Animated.Value(0)).current;
 
   const [fontsLoaded] = useFonts({
-    "Poppins-Regular": require("./assets/fonts/Poppins-Regular.ttf"),
-    "Poppins-Bold": require("./assets/fonts/Poppins-Bold.ttf"),
+    "Poppins-Regular": require("../../assets/fonts/Poppins-Regular.ttf"),
+    "Poppins-Bold": require("../../assets/fonts/Poppins-Bold.ttf"),
   });
 
   useEffect(() => {
