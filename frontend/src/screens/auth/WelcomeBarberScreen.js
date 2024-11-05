@@ -51,7 +51,7 @@ const WelcomeBarberScreen = ({ navigation }) => {
 
   return (
     <ImageBackground
-      source={require('../../assets/images/pexels-thgusstavo-2061820-transformed(1).jpeg')}
+      source={require('../../assets/images/welcomeScreen.jpeg')}
       style={styles.backgroundImage}
       onLoadEnd={() => setIsImageLoaded(true)}
     >
