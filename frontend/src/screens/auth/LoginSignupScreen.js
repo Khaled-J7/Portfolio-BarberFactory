@@ -237,15 +237,6 @@ const LoginSignupScreen = ({ navigation }) => {
         
         // Show success modal for both client and barber
         setShowSuccessModal(true);
-        
-        // In the onClose of success modal, handle navigation based on role
-        if (formData.role === 'barber') {
-          // This navigation will happen after success modal is closed
-          navigation.replace('WelcomeBarber');
-        } else {
-          // This navigation will happen after success modal is closed
-          navigation.replace('Home');
-        }
       }
     } catch (error) {
       setError(error.message || 'Something went wrong');
@@ -365,12 +356,17 @@ const LoginSignupScreen = ({ navigation }) => {
       </ScrollView>
       
       <SuccessModal 
-        visible={showSuccessModal} 
-        onClose={() => {
-          setShowSuccessModal(false);
-          navigation.replace('Home');
-        }}
-      />
+  visible={showSuccessModal} 
+  onClose={() => {
+    setShowSuccessModal(false);
+    // Navigate based on role directly in onClose
+    if (formData.role === 'barber') {
+      navigation.replace('WelcomeBarber');
+    } else {
+      navigation.replace('Home');
+    }
+  }}
+/>
     </KeyboardAvoidingView>
   );
 };
