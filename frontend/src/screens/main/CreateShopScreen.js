@@ -137,7 +137,7 @@ export default function CreateShopScreen({ navigation }) {
 
   return (
     <ImageBackground
-      source={require('../../assets/images/backgroundImageForm.png')}
+      source={require('../../assets/images/pexels-maksgelatin-4351727-transformed.jpeg')}
       style={styles.container}
     >
       <ScrollView 
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
   },
   uploadText: {
-    color: '#FFFFFF',
+    color: '#373A40',
     fontSize: 16,
     fontFamily: 'Poppins-Regular',
     marginLeft: 10,
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: '#FFFFFF',
+    color: '#373A40',
     fontSize: 16,
     fontFamily: 'Poppins-Regular',
     marginLeft: 10,
@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   galleryButtonText: {
-    color: '#FFFFFF',
+    color: '#373A40',
     fontSize: 14,
     fontFamily: 'Poppins-Regular',
     marginLeft: 8,
