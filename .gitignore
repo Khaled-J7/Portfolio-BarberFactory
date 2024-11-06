@@ -18,3 +18,5 @@ package-lock.json   # Root level package-lock
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+update_fork.sh
