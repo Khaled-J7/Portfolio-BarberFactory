@@ -1,13 +1,13 @@
 // App.js
-import "react-native-gesture-handler"; // Must be first import
-import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
-import SplashScreen from "./src/screens/auth/SplashScreen";
-import LoginSignupScreen from "./src/screens/auth/LoginSignupScreen";
-import HomeScreen from "./src/screens/main/HomeScreen";
-import SettingsScreen from "./src/screens/main/SettingsScreen";
+import 'react-native-gesture-handler';  // Must be first import
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import SplashScreen from './src/screens/auth/SplashScreen';
+import LoginSignupScreen from './src/screens/auth/LoginSignupScreen';
 import WelcomeBarberScreen from './src/screens/auth/WelcomeBarberScreen';
+import CreateShopScreen from './src/screens/main/CreateShopScreen';
+import HomeScreen from './src/screens/main/HomeScreen';
 
 const Stack = createStackNavigator();
 
@@ -18,7 +18,7 @@ function App() {
         initialRouteName="Splash"
         screenOptions={{
           headerShown: false,
-          gestureEnabled: false,
+          gestureEnabled: false
         }}
       >
         <Stack.Screen
@@ -32,18 +32,18 @@ function App() {
           options={{ gestureEnabled: false }}
         />
         <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{ gestureEnabled: false }}
-        />
-        <Stack.Screen
-          name="Settings"
-          component={SettingsScreen}
-          options={{ gestureEnabled: false }}
-        />
-        <Stack.Screen
           name="WelcomeBarber"
           component={WelcomeBarberScreen}
+          options={{ gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="CreateShop"
+          component={CreateShopScreen}
+          options={{ gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
           options={{ gestureEnabled: false }}
         />
       </Stack.Navigator>

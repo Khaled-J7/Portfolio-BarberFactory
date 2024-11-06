@@ -73,7 +73,7 @@ const WelcomeBarberScreen = ({ navigation }) => {
                 <Animated.View style={{ opacity: buttonOpacity }}>
                   <TouchableOpacity
                     style={styles.button}
-                    onPress={() => navigation.navigate('CreateShopScreen')}
+                    onPress={() => navigation.navigate('CreateShop')}
                   >
                     <LinearGradient
                       colors={["#2ECC71", "#27AE60"]}
