@@ -270,3 +270,177 @@ export default function CreateShopScreen({ navigation }) {
     </ImageBackground>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    padding: 20,
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+  },
+  section: {
+    marginBottom: 30,
+  },
+  sectionTitle: {
+    color: '#6EC207',
+    fontSize: 28,
+    fontFamily: 'BebasNeue-Regular',
+    marginBottom: 15,
+  },
+  uploadButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    padding: 15,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderStyle: 'dashed',
+  },
+  uploadText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'Poppins-Regular',
+    marginLeft: 10,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 15,
+  },
+  input: {
+    flex: 1,
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'Poppins-Regular',
+    marginLeft: 10,
+    padding: Platform.OS === 'ios' ? 0 : 5,
+  },
+  galleryOptions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  galleryButton: {
+    flex: 0.48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    padding: 15,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  galleryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontFamily: 'Poppins-Regular',
+    marginLeft: 8,
+  },
+  gallery: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginTop: 15,
+  },
+  galleryItem: {
+    width: (Dimensions.get('window').width - 60) / 3,
+    height: (Dimensions.get('window').width - 60) / 3,
+    borderRadius: 10,
+    position: 'relative',
+  },
+  galleryImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
+  },
+  deleteButton: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: '#FFFFFF',
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  createButton: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginVertical: 20,
+  },
+  gradient: {
+    paddingVertical: 15,
+    alignItems: 'center',
+  },
+  createButtonText: {
+    color: '#181C14',
+    fontSize: 22,
+    fontFamily: 'BebasNeue-Regular',
+  },
+  // Success Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#262626',
+    borderRadius: 20,
+    padding: 30,
+    alignItems: 'center',
+    width: '85%',
+    maxWidth: 340,
+  },
+  successIcon: {
+    marginBottom: 20,
+  },
+  successTitle: {
+    color: '#FFFFFF',
+    fontSize: 32,
+    fontFamily: 'BebasNeue-Regular',
+    marginBottom: 15,
+  },
+  successMessage: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'Poppins-Regular',
+    textAlign: 'center',
+    marginBottom: 25,
+    lineHeight: 24,
+  },
+  successButton: {
+    width: '100%',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  successGradient: {
+    paddingVertical: 15,
+    alignItems: 'center',
+  },
+  successButtonText: {
+    color: '#181C14',
+    fontSize: 20,
+    fontFamily: 'BebasNeue-Regular',
+  },
+});
