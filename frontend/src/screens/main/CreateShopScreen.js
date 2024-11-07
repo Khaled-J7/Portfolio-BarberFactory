@@ -132,6 +132,7 @@ export default function CreateShopScreen({ navigation }) {
 
   const handleSubmit = () => {
     if (!validateForm()) return;
+    // Show success modal first
     setShowSuccessModal(true);
   };
 
@@ -263,8 +264,16 @@ export default function CreateShopScreen({ navigation }) {
         visible={showSuccessModal}
         onClose={() => {
           setShowSuccessModal(false);
-          // Will navigate to BarberProfile screen when implemented
-          console.log('Navigate to profile');
+          // Navigate to BarberProfile with shop data
+          navigation.replace('BarberProfile', {
+            shopData: {
+              coverImage: formData.coverImage,
+              name: formData.name,
+              phone: formData.phone,
+              address: formData.address,
+              galleryImages: formData.galleryImages
+            }
+          });
         }}
       />
     </ImageBackground>

@@ -7,6 +7,7 @@ import SplashScreen from './src/screens/auth/SplashScreen';
 import LoginSignupScreen from './src/screens/auth/LoginSignupScreen';
 import WelcomeBarberScreen from './src/screens/auth/WelcomeBarberScreen';
 import CreateShopScreen from './src/screens/main/CreateShopScreen';
+import BarberProfileScreen from './src/screens/main/BarberProfileScreen';
 import HomeScreen from './src/screens/main/HomeScreen';
 
 const Stack = createStackNavigator();
@@ -39,6 +40,11 @@ function App() {
         <Stack.Screen
           name="CreateShop"
           component={CreateShopScreen}
+          options={{ gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="BarberProfile"
+          component={BarberProfileScreen}
           options={{ gestureEnabled: false }}
         />
         <Stack.Screen
