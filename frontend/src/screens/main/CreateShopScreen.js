@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
   },
   uploadText: {
-    color: '#373A40',
+    color: '#FFFFFF',
     fontSize: 16,
     fontFamily: 'Poppins-Regular',
     marginLeft: 10,
@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: '#373A40',
+    color: '#FFFFFF',
     fontSize: 16,
     fontFamily: 'Poppins-Regular',
     marginLeft: 10,
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   galleryButtonText: {
-    color: '#373A40',
+    color: '#FFFFFF',
     fontSize: 14,
     fontFamily: 'Poppins-Regular',
     marginLeft: 8,
