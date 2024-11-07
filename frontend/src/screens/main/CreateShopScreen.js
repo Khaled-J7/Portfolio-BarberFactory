@@ -17,6 +17,7 @@ import {
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
+import shopService from '../../services/shopService';
 
 // Success Modal Component
 const SuccessModal = ({ visible, onClose }) => (
@@ -130,11 +131,36 @@ export default function CreateShopScreen({ navigation }) {
     return true;
   };
 
-  const handleSubmit = () => {
-    if (!validateForm()) return;
-    // Show success modal first
+    // Update handleSubmit function
+const handleSubmit = async () => {
+  if (!validateForm()) return;
+  
+  try {
+    // Get token
+    const token = await AsyncStorage.getItem('userToken');
+    if (!token) {
+      Alert.alert('Error', 'Authentication required');
+      return;
+    }
+
+    // Prepare shop data
+    const shopData = {
+      name: formData.name,
+      phone: formData.phone,
+      address: formData.address,
+      coverImage: formData.coverImage,
+      galleryImages: formData.galleryImages
+    };
+
+    // Create shop in backend
+    const createdShop = await shopService.createShop(shopData, token);
+    
+    // Show success modal
     setShowSuccessModal(true);
-  };
+  } catch (error) {
+    Alert.alert('Error', error.message || 'Failed to create shop profile');
+  }
+};
 
   return (
     <ImageBackground

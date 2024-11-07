@@ -1,10 +1,9 @@
-// src/components/navigation/BottomNavigationBar.js
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const BottomNavigationBar = ({ navigation }) => {
+const BottomNavigationBar = ({ navigation, activeRoute = "Home" }) => {
   const [isBarber, setIsBarber] = useState(false);
 
   useEffect(() => {
@@ -23,40 +22,68 @@ const BottomNavigationBar = ({ navigation }) => {
     }
   };
 
-  return (
-    <View style={styles.bottomNav}>
-      <TouchableOpacity
-        style={styles.navItem}
-        onPress={() => navigation.navigate("Explore")}
-      >
-        <Feather name="search" size={24} color="#fff" />
-        <Text style={styles.navText}>Explore</Text>
-      </TouchableOpacity>
+  const handleProfilePress = () => {
+    if (isBarber) {
+      navigation.navigate("BarberProfile");
+    } else {
+      // Will navigate to ClientProfile when implemented
+      console.log("Client profile not implemented yet");
+    }
+  };
 
-      <TouchableOpacity
-        style={styles.navItem}
-        onPress={() => navigation.navigate("Home")}
-      >
-        <Feather name="home" size={24} color="#fff" />
-        <Text style={styles.navText}>Home</Text>
-      </TouchableOpacity>
+  const navigationItems = [
+    {
+      name: "Explore",
+      icon: "search",
+      onPress: () => navigation.navigate("Explore"),
+    },
+    {
+      name: "Home",
+      icon: "home",
+      onPress: () => navigation.navigate("Home"),
+    },
+    {
+      name: "Profile",
+      icon: "user",
+      onPress: handleProfilePress,
+    },
+    {
+      name: "Bookings",
+      icon: "calendar",
+      onPress: () => navigation.navigate("Bookings"),
+    },
+  ];
 
-      <TouchableOpacity style={[styles.navItem, styles.activeNav]}>
+  const renderNavigationItem = ({ name, icon, onPress }) => {
+    const isActive = activeRoute === name;
+    
+    return (
+      <TouchableOpacity
+        key={name}
+        style={styles.tabContainer}
+        onPress={onPress}
+      >
         <Feather
-          name={isBarber ? "shopping-bag" : "user"}
+          name={icon}
           size={24}
-          color="#6EC207"
+          color={isActive ? "#2ECC71" : "#262525"}
+          style={styles.icon}
         />
-        <Text style={[styles.navText, styles.activeText]}>Profile</Text>
+        <Text
+          style={[
+            styles.tabText,
+            isActive && styles.activeTabText
+          ]}
+        >
+          {name}
+        </Text>
       </TouchableOpacity>
+    );
+  };
 
-      <TouchableOpacity
-        style={styles.navItem}
-        onPress={() => navigation.navigate("Appointments")}
-      >
-        <Feather name="calendar" size={24} color="#fff" />
-        <Text style={styles.navText}>Bookings</Text>
-      </TouchableOpacity>
+  return (
+    <View style={styles.container}>
+      {navigationItems.map(renderNavigationItem)}
     </View>
   );
 };
@@ -85,20 +112,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     flex: 1,
-    height: "100%", // Ensure full height usage
-    paddingVertical: 2, // Small padding for better spacing
+    height: "100%",
+    paddingVertical: 2,
   },
   icon: {
-    height: 24,
     marginBottom: 4,
   },
   tabText: {
     fontFamily: "Poppins-Regular",
     fontSize: 11,
     color: "#262525",
-    textAlign: "center", // Ensure text centering
-    includeFontPadding: false, // Remove extra font padding
-    lineHeight: 16, // Consistent line height
+    textAlign: "center",
+    includeFontPadding: false,
+    lineHeight: 16,
   },
   activeTabText: {
     color: "#2ECC71",

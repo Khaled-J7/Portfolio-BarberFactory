@@ -1,9 +1,7 @@
-// src/screens/main/BarberProfileScreen.js
 import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   ScrollView,
   ImageBackground,
@@ -12,24 +10,27 @@ import {
   Dimensions,
   Alert,
   Platform,
+  TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import BottomNavigationBar from '../../components/navigation/BottomNavigationBar';
+import shopService from '../../services/shopService';
 
 const { width } = Dimensions.get('window');
 
+/**
+ * Modal component for viewing images in full screen
+ */
 const ImageViewerModal = ({ visible, imageUrl, onClose }) => (
   <Modal visible={visible} transparent animationType="fade">
     <View style={styles.modalContainer}>
-      <TouchableOpacity 
-        style={styles.closeButton}
-        onPress={onClose}
-      >
+      <TouchableOpacity style={styles.closeButton} onPress={onClose}>
         <Feather name="x" size={24} color="#fff" />
       </TouchableOpacity>
-      
       <Image 
         source={{ uri: imageUrl }}
         style={styles.modalImage}
@@ -39,31 +40,105 @@ const ImageViewerModal = ({ visible, imageUrl, onClose }) => (
   </Modal>
 );
 
-const OptionsModal = ({ visible, onClose, onDelete }) => (
-  <Modal transparent visible={visible} onRequestClose={onClose}>
-    <TouchableOpacity 
-      style={styles.optionsOverlay} 
-      activeOpacity={1} 
-      onPress={onClose}
-    >
-      <View style={styles.optionsContainer}>
-        <TouchableOpacity 
-          style={styles.optionItem} 
-          onPress={() => {
-            onDelete();
-            onClose();
-          }}
-        >
-          <Feather name="trash-2" size={20} color="#FF3B30" />
-          <Text style={styles.optionText}>Delete Image</Text>
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
-  </Modal>
-);
+/**
+ * Modal component for updating shop information
+ */
+const UpdateInfoModal = ({ visible, onClose, initialData, onSave }) => {
+  const [formData, setFormData] = useState(initialData);
 
+  useEffect(() => {
+    setFormData(initialData);
+  }, [initialData]);
+
+  const handleSave = async () => {
+    try {
+      // Basic validation
+      if (!formData.name.trim() || !formData.phone.trim() || !formData.address.trim()) {
+        Alert.alert('Error', 'All fields are required');
+        return;
+      }
+
+      // Call parent's onSave with updated data
+      await onSave(formData);
+      onClose();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update profile');
+    }
+  };
+
+  return (
+    <Modal
+      transparent
+      visible={visible}
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.updateModalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Update Shop Information</Text>
+            <TouchableOpacity onPress={onClose}>
+              <Feather name="x" size={24} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.formContainer}>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Barbershop Name</Text>
+              <TextInput
+                style={styles.input}
+                value={formData.name}
+                onChangeText={(text) => setFormData(prev => ({ ...prev, name: text }))}
+                placeholderTextColor="rgba(255,255,255,0.5)"
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Phone Number</Text>
+              <TextInput
+                style={styles.input}
+                value={formData.phone}
+                onChangeText={(text) => setFormData(prev => ({ ...prev, phone: text }))}
+                keyboardType="phone-pad"
+                placeholderTextColor="rgba(255,255,255,0.5)"
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Address</Text>
+              <TextInput
+                style={styles.input}
+                value={formData.address}
+                onChangeText={(text) => setFormData(prev => ({ ...prev, address: text }))}
+                placeholderTextColor="rgba(255,255,255,0.5)"
+              />
+            </View>
+          </View>
+
+          <TouchableOpacity 
+            style={styles.saveButton}
+            onPress={handleSave}
+          >
+            <LinearGradient
+              colors={['#2ECC71', '#27AE60']}
+              style={styles.saveGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            >
+              <Text style={styles.saveButtonText}>Save Changes</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
+/**
+ * Main BarberProfileScreen Component
+ */
 const BarberProfileScreen = ({ route, navigation }) => {
-  // States for profile data and UI
+  // State Management
   const [profileData, setProfileData] = useState({
     coverImage: '',
     name: '',
@@ -73,48 +148,71 @@ const BarberProfileScreen = ({ route, navigation }) => {
   });
   const [viewerConfig, setViewerConfig] = useState({
     visible: false,
-    currentImage: null,
-    isCoverImage: false,
-    currentIndex: 0
+    currentImage: null
   });
-  const [showOptions, setShowOptions] = useState(false);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(null);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Load profile data from CreateShopScreen
+  // Load shop data on mount
   useEffect(() => {
     if (route.params?.shopData) {
+      // If coming from shop creation, use that data
       setProfileData(route.params.shopData);
+    } else {
+      // Otherwise load from API
+      loadShopData();
     }
-  }, [route.params]);
+  }, []);
 
-  // Handle info updates
-  const handleUpdateInfo = (field) => {
-    Alert.prompt(
-      `Update ${field}`,
-      'Enter new value:',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel'
-        },
-        {
-          text: 'Update',
-          onPress: (value) => {
-            if (value) {
-              setProfileData(prev => ({
-                ...prev,
-                [field]: value
-              }));
-            }
-          }
-        }
-      ],
-      'plain-text',
-      profileData[field]
-    );
+  /**
+   * Fetch shop profile data from backend
+   */
+  const loadShopData = async () => {
+    setIsLoading(true);
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      if (!token) {
+        Alert.alert('Error', 'Authentication required');
+        return;
+      }
+
+      const shopData = await shopService.getShopProfile(token);
+      setProfileData(shopData);
+    } catch (error) {
+      console.error('Error loading shop data:', error);
+      Alert.alert('Error', 'Failed to load shop profile');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // Image handling functions
+  /**
+   * Handle shop information updates
+   */
+  const handleUpdateProfile = async (updatedData) => {
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      if (!token) {
+        Alert.alert('Error', 'Authentication required');
+        return;
+      }
+
+      const updatedShop = await shopService.updateShopProfile({
+        ...profileData,
+        ...updatedData
+      }, token);
+
+      setProfileData(updatedShop);
+      Alert.alert('Success', 'Profile updated successfully');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update profile');
+      throw error;
+    }
+  };
+
+  /**
+   * Handle image picking for cover and gallery
+   */
   const handleImagePick = async (type) => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -125,44 +223,47 @@ const BarberProfileScreen = ({ route, navigation }) => {
       });
 
       if (!result.canceled) {
-        if (type === 'cover') {
-          setProfileData(prev => ({
-            ...prev,
-            coverImage: result.assets[0].uri
-          }));
-        } else {
-          setProfileData(prev => ({
-            ...prev,
-            galleryImages: [...prev.galleryImages, result.assets[0].uri]
-          }));
+        const newImage = result.assets[0].uri;
+        
+        const token = await AsyncStorage.getItem('userToken');
+        if (!token) {
+          Alert.alert('Error', 'Authentication required');
+          return;
         }
+
+        const updateData = type === 'cover' 
+          ? { ...profileData, coverImage: newImage }
+          : { ...profileData, galleryImages: [...profileData.galleryImages, newImage] };
+
+        const updatedShop = await shopService.updateShopProfile(updateData, token);
+        setProfileData(updatedShop);
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to pick image');
+      Alert.alert('Error', 'Failed to update image');
     }
   };
 
-  const handleDeleteImage = (index) => {
-    Alert.alert(
-      'Delete Image',
-      'Are you sure you want to delete this image?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel'
-        },
-        {
-          text: 'Delete',
-          onPress: () => {
-            setProfileData(prev => ({
-              ...prev,
-              galleryImages: prev.galleryImages.filter((_, i) => i !== index)
-            }));
-          },
-          style: 'destructive'
-        }
-      ]
-    );
+  /**
+   * Handle gallery image deletion
+   */
+  const handleDeleteImage = async (index) => {
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      if (!token) {
+        Alert.alert('Error', 'Authentication required');
+        return;
+      }
+
+      const newGalleryImages = profileData.galleryImages.filter((_, i) => i !== index);
+      const updatedShop = await shopService.updateShopProfile({
+        ...profileData,
+        galleryImages: newGalleryImages
+      }, token);
+
+      setProfileData(updatedShop);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to delete image');
+    }
   };
 
   return (
@@ -170,13 +271,18 @@ const BarberProfileScreen = ({ route, navigation }) => {
       source={require("../../assets/images/BlackThemeBackgroundImage.jpg")}
       style={styles.container}
     >
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#6EC207" />
+        </View>
+      )}
+
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Cover Image */}
         <TouchableOpacity
           onPress={() => profileData.coverImage && setViewerConfig({
             visible: true,
-            currentImage: profileData.coverImage,
-            isCoverImage: true
+            currentImage: profileData.coverImage
           })}
         >
           <View style={styles.coverContainer}>
@@ -195,17 +301,21 @@ const BarberProfileScreen = ({ route, navigation }) => {
 
         {/* Profile Info */}
         <View style={styles.profileSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Shop Information</Text>
+            <TouchableOpacity 
+              style={styles.menuButton}
+              onPress={() => setShowUpdateModal(true)}
+            >
+              <Feather name="more-vertical" size={24} color="#6EC207" />
+            </TouchableOpacity>
+          </View>
+
           <View style={styles.infoItem}>
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>Barbershop Name</Text>
               <Text style={styles.infoValue}>{profileData.name}</Text>
             </View>
-            <TouchableOpacity 
-              style={styles.editButton}
-              onPress={() => handleUpdateInfo('name')}
-            >
-              <Feather name="edit-2" size={20} color="#6EC207" />
-            </TouchableOpacity>
           </View>
 
           <View style={styles.infoItem}>
@@ -213,12 +323,6 @@ const BarberProfileScreen = ({ route, navigation }) => {
               <Text style={styles.infoLabel}>Phone Number</Text>
               <Text style={styles.infoValue}>{profileData.phone}</Text>
             </View>
-            <TouchableOpacity 
-              style={styles.editButton}
-              onPress={() => handleUpdateInfo('phone')}
-            >
-              <Feather name="edit-2" size={20} color="#6EC207" />
-            </TouchableOpacity>
           </View>
 
           <View style={styles.infoItem}>
@@ -226,16 +330,10 @@ const BarberProfileScreen = ({ route, navigation }) => {
               <Text style={styles.infoLabel}>Address</Text>
               <Text style={styles.infoValue}>{profileData.address}</Text>
             </View>
-            <TouchableOpacity 
-              style={styles.editButton}
-              onPress={() => handleUpdateInfo('address')}
-            >
-              <Feather name="edit-2" size={20} color="#6EC207" />
-            </TouchableOpacity>
           </View>
         </View>
 
-        {/* Gallery */}
+        {/* Gallery Section */}
         <View style={styles.gallerySection}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Gallery</Text>
@@ -250,25 +348,20 @@ const BarberProfileScreen = ({ route, navigation }) => {
 
           <View style={styles.galleryGrid}>
             {profileData.galleryImages.map((image, index) => (
-              <View key={index} style={styles.galleryItem}>
+              <View key={index} style={styles.galleryItemContainer}>
                 <TouchableOpacity
                   onPress={() => setViewerConfig({
                     visible: true,
-                    currentImage: image,
-                    currentIndex: index,
-                    isCoverImage: false
+                    currentImage: image
                   })}
                 >
                   <Image source={{ uri: image }} style={styles.galleryImage} />
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.optionsButton}
-                  onPress={() => {
-                    setSelectedImageIndex(index);
-                    setShowOptions(true);
-                  }}
+                <TouchableOpacity 
+                  style={styles.deleteImageButton}
+                  onPress={() => handleDeleteImage(index)}
                 >
-                  <Feather name="more-vertical" size={20} color="#fff" />
+                  <Feather name="trash-2" size={16} color="#FF3B30" />
                 </TouchableOpacity>
               </View>
             ))}
@@ -278,24 +371,18 @@ const BarberProfileScreen = ({ route, navigation }) => {
 
       <BottomNavigationBar navigation={navigation} />
 
+      {/* Modals */}
       <ImageViewerModal 
         visible={viewerConfig.visible}
         imageUrl={viewerConfig.currentImage}
-        onClose={() => setViewerConfig({
-          visible: false,
-          currentImage: null,
-          isCoverImage: false,
-          currentIndex: 0
-        })}
+        onClose={() => setViewerConfig({ visible: false, currentImage: null })}
       />
-      
-      <OptionsModal
-        visible={showOptions}
-        onClose={() => setShowOptions(false)}
-        onDelete={() => {
-          handleDeleteImage(selectedImageIndex);
-          setSelectedImageIndex(null);
-        }}
+
+      <UpdateInfoModal
+        visible={showUpdateModal}
+        onClose={() => setShowUpdateModal(false)}
+        initialData={profileData}
+        onSave={handleUpdateProfile}
       />
     </ImageBackground>
   );
@@ -305,7 +392,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  // Cover Section
   coverContainer: {
     height: 200,
     width: '100%',
@@ -325,33 +411,33 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
-
-  // Profile Section
   profileSection: {
     paddingHorizontal: 20,
     paddingTop: 30,
     paddingBottom: 20,
   },
-  infoItem: {
+  sectionHeader: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontFamily: 'BebasNeue-Regular',
+    fontSize: 28,
+    color: '#6EC207',
+  },
+  menuButton: {
+    padding: 5,
+  },
+  infoItem: {
     paddingVertical: 15,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
   infoContent: {
     flex: 1,
-    marginRight: 15,
   },
   infoLabel: {
     fontFamily: 'Poppins-Bold',
@@ -364,25 +450,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#FFFFFF',
   },
-  editButton: {
-    padding: 5,
-  },
 
-  // Gallery Section
+  // Gallery styles
   gallerySection: {
     paddingHorizontal: 20,
     paddingTop: 20,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontFamily: 'BebasNeue-Regular',
-    fontSize: 28,
-    color: '#6EC207',
   },
   addButton: {
     flexDirection: 'row',
@@ -403,31 +475,13 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 12,
   },
-  galleryItem: {
+  galleryImage: {
     width: (width - 52) / 3,
     height: (width - 52) / 3,
     borderRadius: 10,
-    overflow: 'hidden',
-    position: 'relative',
-  },
-  galleryImage: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 10,
-  },
-  optionsButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 
-  // Modals
+  // Modal styles
   modalContainer: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.95)',
@@ -437,7 +491,6 @@ const styles = StyleSheet.create({
   modalImage: {
     width: width,
     height: width,
-    resizeMode: 'contain',
   },
   closeButton: {
     position: 'absolute',
@@ -451,28 +504,62 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 1,
   },
-  optionsOverlay: {
+  modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  optionsContainer: {
+  updateModalContent: {
+    width: width * 0.9,
     backgroundColor: '#262626',
-    borderRadius: 15,
-    width: '70%',
-    overflow: 'hidden',
+    borderRadius: 20,
+    padding: 20,
   },
-  optionItem: {
+  modalHeader: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    marginBottom: 20,
   },
-  optionText: {
+  modalTitle: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: 20,
+    color: '#FFFFFF',
+  },
+  formContainer: {
+    gap: 15,
+  },
+  inputGroup: {
+    marginBottom: 15,
+  },
+  inputLabel: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: 14,
+    color: '#6EC207',
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 10,
+    padding: 15,
+    color: '#FFFFFF',
     fontFamily: 'Poppins-Regular',
     fontSize: 16,
-    color: '#FF3B30',
-    marginLeft: 12,
+  },
+  saveButton: {
+    marginTop: 20,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  saveGradient: {
+    paddingVertical: 15,
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    fontFamily: 'Poppins-Bold',
+    color: '#181C14',
+    fontSize: 16,
   },
 });
 
