@@ -160,7 +160,7 @@ const BarberProfileScreen = ({ route, navigation }) => {
 
   return (
     <ImageBackground
-      source={require("../../assets/images/backgroundImageForm.png")}
+      source={require("../../assets/images/backgroundImageForm.jpeg")}
       style={styles.container}
     >
       <ScrollView showsVerticalScrollIndicator={false}>

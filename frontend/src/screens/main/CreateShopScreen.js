@@ -138,7 +138,7 @@ export default function CreateShopScreen({ navigation }) {
 
   return (
     <ImageBackground
-      source={require('../../assets/images/pexels-maksgelatin-4351727-transformed.jpeg')}
+      source={require('../../assets/images/BlackThemeBackgroundImage.jpg')}
       style={styles.container}
     >
       <ScrollView 
