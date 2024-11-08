@@ -15,4 +15,7 @@ router.get('/profile', shopController.getShopProfile);
 // Update shop profile
 router.put('/update', shopController.updateShopProfile);
 
+// Get All shops
+router.get('/all', shopController.getAllShops);
+
 module.exports = router;

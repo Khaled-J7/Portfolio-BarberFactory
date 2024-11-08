@@ -1,5 +1,6 @@
 // src/screens/main/HomeScreen.js
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,39 +10,47 @@ import {
   Image,
   Platform,
   StatusBar,
-  ScrollView
-} from 'react-native';
-import { Feather } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import CustomDrawer from '../../components/navigation/CustomDrawer';
-import BarbershopCard from '../../components/ui/BarbershopCard';
+  ScrollView,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+import { Feather } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import CustomDrawer from "../../components/navigation/CustomDrawer";
+import BarbershopCard from "../../components/ui/BarbershopCard";
+import shopService from "../../services/shopService";
 
-// Debug
-console.log("This is HomeScreen Debug test");
-
-const HomeScreen = ({ navigation, route }) => {
+const HomeScreen = ({ navigation }) => {
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
-  const [userType, setUserType] = useState('client');
-  const [barbershops, setBarbershops] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [shops, setShops] = useState([]);
 
   useEffect(() => {
-    const getUserType = async () => {
-      try {
-        const userData = await AsyncStorage.getItem('userData');
-        if (userData) {
-          const { isBarber } = JSON.parse(userData);
-          setUserType(isBarber ? 'barber' : 'client');
-        }
-      } catch (error) {
-        console.error('Error fetching user type:', error);
-      }
-    };
-    getUserType();
+    loadShops();
   }, []);
+
+  const loadShops = async () => {
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("userToken");
+      if (!token) {
+        Alert.alert("Error", "Authentication required");
+        return;
+      }
+
+      const allShops = await shopService.getAllShops(token);
+      setShops(allShops);
+    } catch (error) {
+      console.error("Error loading shops:", error);
+      Alert.alert("Error", "Failed to load barbershops");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleBookPress = (shopId) => {
     // Will be implemented when we create the booking system
-    console.log('Booking pressed for shop:', shopId);
+    console.log("Booking pressed for shop:", shopId);
   };
 
   return (
@@ -50,9 +59,7 @@ const HomeScreen = ({ navigation, route }) => {
 
       {/* Top Bar */}
       <View style={styles.topBar}>
-        <TouchableOpacity
-          onPress={() => setIsDrawerVisible(true)}
-        >
+        <TouchableOpacity onPress={() => setIsDrawerVisible(true)}>
           <Feather name="list" size={24} color="#262525" />
         </TouchableOpacity>
 
@@ -64,7 +71,7 @@ const HomeScreen = ({ navigation, route }) => {
       {/* Logo */}
       <View style={styles.logoContainer}>
         <Image
-          source={require('../../assets/images/appLogo.png')}
+          source={require("../../assets/images/appLogo.png")}
           style={styles.logo}
           resizeMode="contain"
         />
@@ -74,30 +81,31 @@ const HomeScreen = ({ navigation, route }) => {
       <Text style={styles.title}>Discover nearby Barbershops</Text>
 
       {/* Barbershops List */}
-      <ScrollView 
-        style={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
-        {barbershops.length > 0 ? (
-          barbershops.map((shop) => (
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {loading ? (
+          <ActivityIndicator
+            size="large"
+            color="#2ECC71"
+            style={styles.loader}
+          />
+        ) : shops.length > 0 ? (
+          shops.map((shop) => (
             <BarbershopCard
-              key={shop.id}
+              key={shop._id}
               shopName={shop.name}
               address={shop.address}
               phone={shop.phone}
-              imageUrl={shop.imageUrl}
-              onBookPress={() => handleBookPress(shop.id)}
+              imageUrl={shop.coverImage}
+              onBookPress={() => handleBookPress(shop._id)}
             />
           ))
         ) : (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>
-              No barbershops available yet.
-            </Text>
+            <Text style={styles.emptyText}>No barbershops available yet.</Text>
           </View>
         )}
       </ScrollView>
-      
+
       {/* Drawer */}
       <CustomDrawer
         isVisible={isDrawerVisible}
@@ -111,21 +119,21 @@ const HomeScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   topBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    height: Platform.OS === 'ios' ? 90 : 60,
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+    height: Platform.OS === "ios" ? 90 : 60,
   },
   iconButton: {
     padding: 10,
-    backgroundColor: '#F8F8F8', // Light background for visibility
+    backgroundColor: "#F8F8F8", // Light background for visibility
     borderRadius: 10,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -135,7 +143,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   logoContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginVertical: 20,
   },
   logo: {
@@ -143,10 +151,10 @@ const styles = StyleSheet.create({
     height: 150,
   },
   title: {
-    fontFamily: 'BebasNeue-Regular',
+    fontFamily: "BebasNeue-Regular",
     fontSize: 32,
-    color: '#262525',
-    textAlign: 'center',
+    color: "#262525",
+    textAlign: "center",
     paddingHorizontal: 20,
     marginBottom: 20,
   },
@@ -156,15 +164,15 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 50,
   },
   emptyText: {
-    fontFamily: 'Poppins-Regular',
+    fontFamily: "Poppins-Regular",
     fontSize: 16,
-    color: '#666666',
-    textAlign: 'center',
+    color: "#666666",
+    textAlign: "center",
   },
 });
 

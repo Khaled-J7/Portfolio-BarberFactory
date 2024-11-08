@@ -61,7 +61,23 @@ const shopController = {
       console.error('Update shop error:', error);
       res.status(500).json({ message: 'Server error', error: error.message });
     }
-  }
+  },
+
+  getAllShops : async (req, res) => {
+    try {
+      // Get all shops, sorted by newest first
+      const shops = await Shop.find()
+        .sort({ createdAt: -1 })  // -1 for descending order (newest first)
+        .populate('owner', 'fullName'); // Get owner's name if needed
+
+      res.json(shops);
+    } catch (error) {
+      console.error('Get all shops error:', error);
+      res.status(500).json({ message: 'Server error', error: error.message });
+    }
+  },
 };
+
+  
 
 module.exports = shopController;

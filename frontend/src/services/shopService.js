@@ -69,7 +69,26 @@ const shopService = {
       console.error('Update shop error:', error);
       throw error;
     }
-  }
+  },
+
+  getAllShops: async (token) => {
+    try {
+      const response = await fetch(`${API_URL}/shop/all`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch shops');
+      }
+
+      return await response.json()
+    } catch(error) {
+      console.error('Get all shops error:', error);
+      throw error;
+    }
+  },
 };
 
 export default shopService;
