@@ -134,44 +134,46 @@ export default function CreateShopScreen({ navigation }) {
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
-    
+
     try {
-      const token = await AsyncStorage.getItem('userToken');
+      const token = await AsyncStorage.getItem("userToken");
       if (!token) {
-        Alert.alert('Error', 'Authentication required');
+        Alert.alert("Error", "Authentication required");
         return;
       }
-  
-      console.log('Starting shop creation...'); // debug
-      console.log('Token available:', !!token); // debug
-      console.log('Form data:', formData); // debug
-  
+
+      console.log("Starting shop creation..."); // debug
+      console.log("Token available:", !!token); // debug
+      console.log("Form data:", formData); // debug
+
       // Create shop in backend
-      const createdShop = await shopService.createShop({
-        name: formData.name,
-        phone: formData.phone,
-        address: formData.address,
-        coverImage: formData.coverImage,
-        galleryImages: formData.galleryImages
-      }, token);
-  
-      console.log('Shop created successfully:', createdShop); // debug
-  
+      const createdShop = await shopService.createShop(
+        {
+          name: formData.name,
+          phone: formData.phone,
+          address: formData.address,
+          coverImage: formData.coverImage,
+          galleryImages: formData.galleryImages,
+        },
+        token
+      );
+
+      console.log("Shop created successfully:", createdShop); // debug
+
       if (!createdShop) {
-        throw new Error('No data received from shop creation');
+        throw new Error("No data received from shop creation");
       }
-  
+
       // Update local form data with created shop data
       setFormData(createdShop);
-      
+
       // Show success modal
       setShowSuccessModal(true);
-  
     } catch (error) {
-      console.error('Shop creation error:', error); // debug
+      console.error("Shop creation error:", error); // debug
       Alert.alert(
-        'Error',
-        error.message || 'Failed to create shop profile. Please try again.'
+        "Error",
+        error.message || "Failed to create shop profile. Please try again."
       );
     }
   };
@@ -307,37 +309,43 @@ export default function CreateShopScreen({ navigation }) {
       </ScrollView>
 
       <SuccessModal
-  visible={showSuccessModal}
-  onClose={async () => {
-    try {
-      const token = await AsyncStorage.getItem('userToken');
-      if (!token) {
-        Alert.alert('Error', 'Authentication required');
-        return;
-      }
+        visible={showSuccessModal}
+        onClose={async () => {
+          try {
+            const token = await AsyncStorage.getItem("userToken");
+            if (!token) {
+              Alert.alert("Error", "Authentication required");
+              return;
+            }
+            // Get the latest shop data from backend
+            const shopData = await shopService.getShopProfile(token);
+            console.log("Retrieved shop data before navigation:", shopData); // debug
+            setShowSuccessModal(false);
 
-      // Get the latest shop data from backend
-      const shopData = await shopService.getShopProfile(token);
-      console.log('Retrieved shop data before navigation:', shopData); // debug
-
-      setShowSuccessModal(false);
-      navigation.replace('BarberProfile', { shopData });
-    } catch (error) {
-      console.error('Navigation error:', error); // debug
-      Alert.alert('Error', 'Failed to load shop profile');
-      // Navigate anyway with local data as fallback
-      navigation.replace('BarberProfile', {
-        shopData: {
-          coverImage: formData.coverImage,
-          name: formData.name,
-          phone: formData.phone,
-          address: formData.address,
-          galleryImages: formData.galleryImages,
-        },
-      });
-    }
-  }}
-/>
+            // New navigation way
+            navigation.replace("MainApp", {
+              screen: "Profile",
+              params: { shopData },
+            });
+          } catch (error) {
+            console.error("Navigation error:", error); // debug
+            Alert.alert("Error", "Failed to load shop profile");
+            // Navigate anyway with local data as fallback
+            navigation.replace("MainApp", {
+              screen: "Profile",
+              params: {
+                shopData: {
+                  coverImage: formData.coverImage,
+                  name: formData.name,
+                  phone: formData.phone,
+                  address: formData.address,
+                  galleryImages: formData.galleryImages,
+                },
+              },
+            });
+          }
+        }}
+      />
     </ImageBackground>
   );
 }

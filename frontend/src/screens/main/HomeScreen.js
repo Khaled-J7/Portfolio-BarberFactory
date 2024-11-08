@@ -13,7 +13,6 @@ import {
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import BottomNavigationBar from '../../components/navigation/BottomNavigationBar';
 import CustomDrawer from '../../components/navigation/CustomDrawer';
 import BarbershopCard from '../../components/ui/BarbershopCard';
 
@@ -98,9 +97,7 @@ const HomeScreen = ({ navigation, route }) => {
           </View>
         )}
       </ScrollView>
-
-      {/* Bottom Navigation */}
-      <BottomNavigationBar navigation={navigation} route={route} />
+      
       {/* Drawer */}
       <CustomDrawer
         isVisible={isDrawerVisible}

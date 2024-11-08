@@ -9,7 +9,7 @@
  * - Keyboard avoiding behavior
  */
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -23,11 +23,11 @@ import {
   ActivityIndicator,
   Modal,
   Alert,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import * as Font from 'expo-font';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import authService from '../../services/authService';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import * as Font from "expo-font";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import authService from "../../services/authService";
 
 /**
  * Custom Password Input Component
@@ -35,7 +35,7 @@ import authService from '../../services/authService';
  */
 const PasswordInput = ({ label, placeholder, value, onChangeText }) => {
   const [isVisible, setIsVisible] = useState(false);
-  
+
   return (
     <>
       <Text style={styles.inputLabel}>{label}</Text>
@@ -67,7 +67,13 @@ const PasswordInput = ({ label, placeholder, value, onChangeText }) => {
  * Regular Input Component
  * For non-password fields
  */
-const RegularInput = ({ label, placeholder, value, onChangeText, keyboardType }) => (
+const RegularInput = ({
+  label,
+  placeholder,
+  value,
+  onChangeText,
+  keyboardType,
+}) => (
   <>
     <Text style={styles.inputLabel}>{label}</Text>
     <TextInput
@@ -76,7 +82,7 @@ const RegularInput = ({ label, placeholder, value, onChangeText, keyboardType })
       placeholderTextColor="#666"
       value={value}
       onChangeText={onChangeText}
-      keyboardType={keyboardType || 'default'}
+      keyboardType={keyboardType || "default"}
     />
   </>
 );
@@ -85,29 +91,37 @@ const RoleSelector = ({ selectedRole, onRoleChange }) => (
   <View style={styles.roleSelectorContainer}>
     <Text style={styles.inputLabel}>I am a:</Text>
     <View style={styles.roleOptionsContainer}>
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[
-          styles.roleOption, 
-          selectedRole === 'client' && styles.roleOptionSelected
+          styles.roleOption,
+          selectedRole === "client" && styles.roleOptionSelected,
         ]}
-        onPress={() => onRoleChange('client')}
+        onPress={() => onRoleChange("client")}
       >
-        <Text style={[
-          styles.roleOptionText,
-          selectedRole === 'client' && styles.roleOptionTextSelected
-        ]}>Client</Text>
+        <Text
+          style={[
+            styles.roleOptionText,
+            selectedRole === "client" && styles.roleOptionTextSelected,
+          ]}
+        >
+          Client
+        </Text>
       </TouchableOpacity>
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[
-          styles.roleOption, 
-          selectedRole === 'barber' && styles.roleOptionSelected
+          styles.roleOption,
+          selectedRole === "barber" && styles.roleOptionSelected,
         ]}
-        onPress={() => onRoleChange('barber')}
+        onPress={() => onRoleChange("barber")}
       >
-        <Text style={[
-          styles.roleOptionText,
-          selectedRole === 'barber' && styles.roleOptionTextSelected
-        ]}>Barber</Text>
+        <Text
+          style={[
+            styles.roleOptionText,
+            selectedRole === "barber" && styles.roleOptionTextSelected,
+          ]}
+        >
+          Barber
+        </Text>
       </TouchableOpacity>
     </View>
   </View>
@@ -132,10 +146,7 @@ const SuccessModal = ({ visible, onClose }) => (
         <Text style={styles.modalMessage}>
           Your account has been created successfully
         </Text>
-        <TouchableOpacity
-          style={styles.modalButton}
-          onPress={onClose}
-        >
+        <TouchableOpacity style={styles.modalButton} onPress={onClose}>
           <Text style={styles.modalButtonText}>Continue</Text>
         </TouchableOpacity>
       </View>
@@ -148,14 +159,14 @@ const LoginSignupScreen = ({ navigation }) => {
   // State Management
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: '',
-    phoneNumber: '',
-    password: '',
-    confirmPassword: '',
-    role: 'client', // default to client
+    fullName: "",
+    phoneNumber: "",
+    password: "",
+    confirmPassword: "",
+    role: "client", // default to client
   });
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
@@ -166,9 +177,9 @@ const LoginSignupScreen = ({ navigation }) => {
 
   const loadFonts = async () => {
     await Font.loadAsync({
-      'BebasNeue-Regular': require('../../assets/fonts/BebasNeue-Regular.ttf'),
-      'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
-      'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf'),
+      "BebasNeue-Regular": require("../../assets/fonts/BebasNeue-Regular.ttf"),
+      "Poppins-Regular": require("../../assets/fonts/Poppins-Regular.ttf"),
+      "Poppins-Bold": require("../../assets/fonts/Poppins-Bold.ttf"),
     });
   };
 
@@ -177,28 +188,28 @@ const LoginSignupScreen = ({ navigation }) => {
    * Returns: boolean indicating if form is valid
    */
   const validateForm = () => {
-    setError('');
+    setError("");
 
     if (!formData.phoneNumber || !formData.password) {
-      setError('Phone number and password are required');
+      setError("Phone number and password are required");
       return false;
     }
 
     if (!isLogin) {
       if (!formData.fullName) {
-        setError('Full name is required');
+        setError("Full name is required");
         return false;
       }
       if (!formData.role) {
-        setError('Please select your role');
+        setError("Please select your role");
         return false;
       }
       if (formData.password !== formData.confirmPassword) {
-        setError('Passwords do not match');
+        setError("Passwords do not match");
         return false;
       }
       if (formData.password.length < 6) {
-        setError('Password must be at least 6 characters');
+        setError("Password must be at least 6 characters");
         return false;
       }
     }
@@ -214,33 +225,38 @@ const LoginSignupScreen = ({ navigation }) => {
     try {
       if (!validateForm()) return;
       setLoading(true);
-      
+
       let response;
       if (isLogin) {
         response = await authService.login({
           phoneNumber: formData.phoneNumber,
           password: formData.password,
         });
-        await AsyncStorage.setItem('userToken', response.token);
-        await AsyncStorage.setItem('userData', JSON.stringify(response.user));
-        navigation.replace('Home');
+        await AsyncStorage.setItem("userToken", response.token);
+        await AsyncStorage.setItem("userData", JSON.stringify(response.user));
+
+        // For login, go directly to MainApp
+        navigation.replace("MainApp");
       } else {
         // Registration
         response = await authService.register({
           fullName: formData.fullName,
           phoneNumber: formData.phoneNumber,
           password: formData.password,
-          isBarber: formData.role === 'barber' // Convert role to boolean
+          isBarber: formData.role === "barber", // Convert role to boolean
         });
-        await AsyncStorage.setItem('userToken', response.token);
-        await AsyncStorage.setItem('userData', JSON.stringify(response.user));
-        
-        // Show success modal for both client and barber
+        await AsyncStorage.setItem("userToken", response.token);
+        await AsyncStorage.setItem("userData", JSON.stringify(response.user));
+
+        // For registration, show modal first
         setShowSuccessModal(true);
+        // The navigation will be handled in the modal's onClose:
+        // If barber -> WelcomeBarber
+        // If client -> MainApp
       }
     } catch (error) {
-      setError(error.message || 'Something went wrong');
-      Alert.alert('Error', error.message);
+      setError(error.message || "Something went wrong");
+      Alert.alert("Error", error.message);
     } finally {
       setLoading(false);
     }
@@ -281,8 +297,8 @@ const LoginSignupScreen = ({ navigation }) => {
         keyboardType="phone-pad"
       />
       <RoleSelector
-      selectedRole={formData.role}
-      onRoleChange={(role) => setFormData({ ...formData, role })}
+        selectedRole={formData.role}
+        onRoleChange={(role) => setFormData({ ...formData, role })}
       />
       <PasswordInput
         label="Password"
@@ -294,7 +310,9 @@ const LoginSignupScreen = ({ navigation }) => {
         label="Confirm Password"
         placeholder="Confirm your password"
         value={formData.confirmPassword}
-        onChangeText={(text) => setFormData({ ...formData, confirmPassword: text })}
+        onChangeText={(text) =>
+          setFormData({ ...formData, confirmPassword: text })
+        }
       />
     </>
   );
@@ -304,10 +322,10 @@ const LoginSignupScreen = ({ navigation }) => {
   }
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 50 : 0}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 50 : 0}
     >
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -315,20 +333,20 @@ const LoginSignupScreen = ({ navigation }) => {
         keyboardShouldPersistTaps="handled"
       >
         <Image
-          source={require('../../assets/images/appLogo.png')}
+          source={require("../../assets/images/appLogo.png")}
           style={styles.logo}
           resizeMode="contain"
         />
-        
-        <Text style={styles.title}>{isLogin ? 'LOGIN' : 'SIGN UP'}</Text>
-        
+
+        <Text style={styles.title}>{isLogin ? "LOGIN" : "SIGN UP"}</Text>
+
         <View style={styles.formContainer}>
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
-          
+
           {isLogin ? renderLoginForm() : renderSignupForm()}
 
-          <TouchableOpacity 
-            style={styles.submitButton} 
+          <TouchableOpacity
+            style={styles.submitButton}
             onPress={handleSubmit}
             disabled={loading}
           >
@@ -336,37 +354,37 @@ const LoginSignupScreen = ({ navigation }) => {
               <ActivityIndicator color="#FFFFFF" />
             ) : (
               <Text style={styles.submitButtonText}>
-                {isLogin ? 'Login' : 'Sign Up'}
+                {isLogin ? "Login" : "Sign Up"}
               </Text>
             )}
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
             <Text style={styles.toggleText}>
-              {isLogin 
-                ? "Don't have an account? Sign Up" 
+              {isLogin
+                ? "Don't have an account? Sign Up"
                 : "Already have an account? Login"}
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => navigation.replace('Home')}>
+          <TouchableOpacity onPress={() => navigation.replace("Home")}>
             <Text style={styles.skipText}>Skip for later</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
-      
-      <SuccessModal 
-  visible={showSuccessModal} 
-  onClose={() => {
-    setShowSuccessModal(false);
-    // Navigate based on role directly in onClose
-    if (formData.role === 'barber') {
-      navigation.replace('WelcomeBarber');
-    } else {
-      navigation.replace('Home');
-    }
-  }}
-/>
+
+      <SuccessModal
+        visible={showSuccessModal}
+        onClose={() => {
+          setShowSuccessModal(false);
+          // Navigate based on role
+          if (formData.role === "barber") {
+            navigation.replace("WelcomeBarber");
+          } else {
+            navigation.replace("MainApp");
+          }
+        }}
+      />
     </KeyboardAvoidingView>
   );
 };
@@ -374,7 +392,7 @@ const LoginSignupScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#C0EBA6',
+    backgroundColor: "#C0EBA6",
   },
   scrollContent: {
     flexGrow: 1,
@@ -383,40 +401,40 @@ const styles = StyleSheet.create({
   logo: {
     width: 150,
     height: 150,
-    alignSelf: 'center',
+    alignSelf: "center",
     marginTop: 50,
   },
   title: {
-    fontFamily: 'BebasNeue-Regular',
+    fontFamily: "BebasNeue-Regular",
     fontSize: 60,
-    color: '#262525',
-    textAlign: 'center',
+    color: "#262525",
+    textAlign: "center",
     marginVertical: 20,
-    textDecorationLine: 'underline',
+    textDecorationLine: "underline",
   },
   formContainer: {
     paddingHorizontal: 20,
   },
   inputContainer: {
-    position: 'relative',
-    width: '100%',
+    position: "relative",
+    width: "100%",
     marginBottom: 15,
   },
   inputLabel: {
-    fontFamily: 'Poppins-Bold',
+    fontFamily: "Poppins-Bold",
     fontSize: 16,
-    color: '#262525',
+    color: "#262525",
     marginBottom: 8,
     marginTop: 16,
   },
   input: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderRadius: 10,
     padding: 15,
     fontSize: 16,
-    fontFamily: 'Poppins-Regular',
-    color: '#262525',
-    shadowColor: '#000',
+    fontFamily: "Poppins-Regular",
+    color: "#262525",
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -426,19 +444,19 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   visibilityToggle: {
-    position: 'absolute',
+    position: "absolute",
     right: 15,
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
     width: 40,
   },
   submitButton: {
-    backgroundColor: '#262525',
+    backgroundColor: "#262525",
     borderRadius: 15,
     padding: 15,
     marginTop: 30,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -448,74 +466,74 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   submitButtonText: {
-    fontFamily: 'Poppins-Bold',
-    color: '#FFFFFF',
+    fontFamily: "Poppins-Bold",
+    color: "#FFFFFF",
     fontSize: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
   toggleText: {
-    fontFamily: 'Poppins-Regular',
-    color: '#262525',
+    fontFamily: "Poppins-Regular",
+    color: "#262525",
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 20,
-    textDecorationLine: 'underline',
+    textDecorationLine: "underline",
   },
   skipText: {
-    fontFamily: 'Poppins-Regular',
-    color: '#262525',
+    fontFamily: "Poppins-Regular",
+    color: "#262525",
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 15,
     opacity: 0.8,
   },
   errorText: {
-    fontFamily: 'Poppins-Regular',
-    color: '#FF0000',
-    textAlign: 'center',
+    fontFamily: "Poppins-Regular",
+    color: "#FF0000",
+    textAlign: "center",
     marginVertical: 10,
     fontSize: 14,
   },
   // Modal styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 20,
     padding: 30,
-    alignItems: 'center',
-    width: '85%',
+    alignItems: "center",
+    width: "85%",
     maxWidth: 400,
   },
   successIconContainer: {
     marginBottom: 20,
   },
   modalTitle: {
-    fontFamily: 'Poppins-Bold',
+    fontFamily: "Poppins-Bold",
     fontSize: 24,
-    color: '#262525',
+    color: "#262525",
     marginBottom: 10,
   },
   modalMessage: {
-    fontFamily: 'Poppins-Regular',
+    fontFamily: "Poppins-Regular",
     fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
     marginBottom: 20,
   },
   modalButton: {
-    backgroundColor: '#2ECC71',
+    backgroundColor: "#2ECC71",
     paddingVertical: 12,
     paddingHorizontal: 30,
     borderRadius: 10,
   },
   modalButtonText: {
-    fontFamily: 'Poppins-Bold',
-    color: 'white',
+    fontFamily: "Poppins-Bold",
+    color: "white",
     fontSize: 16,
   },
   // Role Selecting Styles
@@ -523,8 +541,8 @@ const styles = StyleSheet.create({
     marginVertical: 15,
   },
   roleOptionsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: 10,
   },
   roleOption: {
@@ -532,11 +550,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     padding: 15,
     borderRadius: 10,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderWidth: 2,
-    borderColor: '#FFFFFF',
-    alignItems: 'center',
-    shadowColor: '#000',
+    borderColor: "#FFFFFF",
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -546,16 +564,16 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   roleOptionSelected: {
-    borderColor: '#262525',
-    backgroundColor: '#262525',
+    borderColor: "#262525",
+    backgroundColor: "#262525",
   },
   roleOptionText: {
-    fontFamily: 'Poppins-Bold',
+    fontFamily: "Poppins-Bold",
     fontSize: 16,
-    color: '#262525',
+    color: "#262525",
   },
   roleOptionTextSelected: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
   },
 });
 

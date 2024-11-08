@@ -18,7 +18,6 @@ import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import BottomNavigationBar from '../../components/navigation/BottomNavigationBar';
 import shopService from '../../services/shopService';
 
 const { width } = Dimensions.get('window');
@@ -370,8 +369,6 @@ const BarberProfileScreen = ({ route, navigation }) => {
         </View>
       </ScrollView>
 
-      <BottomNavigationBar navigation={navigation} route={route} />
-      
       {/* Modals */}
       <ImageViewerModal 
         visible={viewerConfig.visible}
