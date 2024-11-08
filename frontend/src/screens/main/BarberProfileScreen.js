@@ -370,8 +370,8 @@ const BarberProfileScreen = ({ route, navigation }) => {
         </View>
       </ScrollView>
 
-      <BottomNavigationBar navigation={navigation} />
-
+      <BottomNavigationBar navigation={navigation} route={route} />
+      
       {/* Modals */}
       <ImageViewerModal 
         visible={viewerConfig.visible}

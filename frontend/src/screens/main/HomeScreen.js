@@ -100,8 +100,7 @@ const HomeScreen = ({ navigation }) => {
       </ScrollView>
 
       {/* Bottom Navigation */}
-      <BottomNavigationBar navigation={navigation} />
-
+      <BottomNavigationBar navigation={navigation} route={route} />
       {/* Drawer */}
       <CustomDrawer
         isVisible={isDrawerVisible}
