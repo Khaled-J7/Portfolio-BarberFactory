@@ -9,6 +9,7 @@ import WelcomeBarberScreen from './src/screens/auth/WelcomeBarberScreen';
 import CreateShopScreen from './src/screens/main/CreateShopScreen';
 import BarberProfileScreen from './src/screens/main/BarberProfileScreen';
 import HomeScreen from './src/screens/main/HomeScreen';
+import SettingsScreen from './src/screens/main/SettingsScreen';
 
 const Stack = createStackNavigator();
 
@@ -50,6 +51,11 @@ function App() {
         <Stack.Screen
           name="Home"
           component={HomeScreen}
+          options={{ gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="settings"
+          component={SettingsScreen}
           options={{ gestureEnabled: false }}
         />
       </Stack.Navigator>
