@@ -3,8 +3,33 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const BottomNavigationBar = ({ navigation, activeRoute = "Home" }) => {
+// Define route names for better type safety
+const ROUTES = {
+  EXPLORE: 'Explore',
+  HOME: 'Home',
+  PROFILE: 'Profile',
+  BARBER_PROFILE: 'BarberProfile',
+  BOOKINGS: 'Bookings'
+};
+
+
+/**
+ * Function to determine if a route should be marked as active
+ * @param {string} currentRoute - The current route name from navigation
+ * @param {string} itemRoute - The route name of the navigation item
+ * @returns {boolean} - Whether the route should be marked as active
+ */
+const isRouteActive = (currentRoute, itemRoute) => {
+  // Special case for Profile/BarberProfile
+  if (itemRoute === ROUTES.PROFILE && currentRoute === ROUTES.BARBER_PROFILE) {
+    return true;
+  }
+  return currentRoute === itemRoute;
+};
+
+const BottomNavigationBar = ({ navigation, route }) => {
   const [isBarber, setIsBarber] = useState(false);
+  const currentRoute = route?.name || ROUTES.HOME;
 
   useEffect(() => {
     checkUserType();
@@ -24,38 +49,38 @@ const BottomNavigationBar = ({ navigation, activeRoute = "Home" }) => {
 
   const handleProfilePress = () => {
     if (isBarber) {
-      navigation.navigate("BarberProfile");
+      navigation.navigate(ROUTES.BARBER_PROFILE);
     } else {
-      // Will navigate to ClientProfile when implemented
+      // Will be implemented when ClientProfile is ready
       console.log("Client profile not implemented yet");
     }
   };
 
   const navigationItems = [
     {
-      name: "Explore",
+      name: ROUTES.EXPLORE,
       icon: "search",
-      onPress: () => navigation.navigate("Explore"),
+      onPress: () => navigation.navigate(ROUTES.EXPLORE),
     },
     {
-      name: "Home",
+      name: ROUTES.HOME,
       icon: "home",
-      onPress: () => navigation.navigate("Home"),
+      onPress: () => navigation.navigate(ROUTES.HOME),
     },
     {
-      name: "Profile",
+      name: ROUTES.PROFILE,
       icon: "user",
       onPress: handleProfilePress,
     },
     {
-      name: "Bookings",
+      name: ROUTES.BOOKINGS,
       icon: "calendar",
-      onPress: () => navigation.navigate("Bookings"),
+      onPress: () => navigation.navigate(ROUTES.BOOKINGS),
     },
   ];
 
   const renderNavigationItem = ({ name, icon, onPress }) => {
-    const isActive = activeRoute === name;
+    const isActive = isRouteActive(currentRoute, name);
     
     return (
       <TouchableOpacity
