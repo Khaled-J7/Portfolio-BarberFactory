@@ -20,7 +20,7 @@ import BarbershopCard from '../../components/ui/BarbershopCard';
 // Debug
 console.log("This is HomeScreen Debug test");
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = ({ navigation, route }) => {
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const [userType, setUserType] = useState('client');
   const [barbershops, setBarbershops] = useState([]);
