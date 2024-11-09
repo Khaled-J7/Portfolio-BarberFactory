@@ -10,16 +10,36 @@ import WelcomeBarberScreen from '../../screens/auth/WelcomeBarberScreen';
 
 // Main Screens
 import HomeScreen from '../../screens/main/HomeScreen';
+import ClientProfileScreen from '../../screens/main/ClientProfileScreen';
 import CreateShopScreen from '../../screens/main/CreateShopScreen';
 import BarberProfileScreen from '../../screens/main/BarberProfileScreen';
 import SettingsScreen from '../../screens/main/SettingsScreen';
 import ViewBarberProfileScreen from '../../screens/main/ViewBarberProfileScreen';
+
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 // Bottom Tab Navigator
 function MainTabNavigator() {
+  const [isBarber, setIsBarber] = useState(false);
+
+  useEffect(() => {
+    checkUserType();
+  }, []);
+
+  const checkUserType = async () => {
+    try {
+      const userData = await AsyncStorage.getItem('userData');
+      if (userData) {
+        const { isBarber } = JSON.parse(userData);
+        setIsBarber(isBarber);
+      }
+    } catch (error) {
+      console.error('Error checking user type:', error);
+    }
+  };
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -52,9 +72,9 @@ function MainTabNavigator() {
           tabBarLabelStyle: { fontFamily: 'Poppins-Regular' }
         }}
       />
-      <Tab.Screen
+       <Tab.Screen
         name="Profile"
-        component={BarberProfileScreen}
+        component={isBarber ? BarberProfileScreen : ClientProfileScreen}
         options={{
           tabBarIcon: ({ color }) => <Feather name="user" size={24} color={color} />,
           tabBarLabelStyle: { fontFamily: 'Poppins-Regular' }

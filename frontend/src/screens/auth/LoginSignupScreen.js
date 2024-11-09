@@ -248,11 +248,13 @@ const LoginSignupScreen = ({ navigation }) => {
         await AsyncStorage.setItem("userToken", response.token);
         await AsyncStorage.setItem("userData", JSON.stringify(response.user));
 
-        // For registration, show modal first
-        setShowSuccessModal(true);
-        // The navigation will be handled in the modal's onClose:
-        // If barber -> WelcomeBarber
-        // If client -> MainApp
+        if (formData.role === 'barber') {
+          // For barbers, show success modal then go to WelcomeBarber
+          setShowSuccessModal(true);
+        } else {
+          // For clients, go directly to MainApp
+          navigation.replace('MainApp');
+        }
       }
     } catch (error) {
       setError(error.message || "Something went wrong");
@@ -373,18 +375,18 @@ const LoginSignupScreen = ({ navigation }) => {
         </View>
       </ScrollView>
 
-      <SuccessModal
-        visible={showSuccessModal}
-        onClose={() => {
-          setShowSuccessModal(false);
-          // Navigate based on role
-          if (formData.role === "barber") {
-            navigation.replace("WelcomeBarber");
-          } else {
-            navigation.replace("MainApp");
-          }
-        }}
-      />
+      <SuccessModal 
+  visible={showSuccessModal} 
+  onClose={() => {
+    setShowSuccessModal(false);
+    // Navigate based on user type
+    if (formData.role === 'barber') {
+      navigation.replace('WelcomeBarber');
+    } else {
+      navigation.replace('MainApp');
+    }
+  }}
+/>
     </KeyboardAvoidingView>
   );
 };

@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema({
   isBarber: {
     type: Boolean,
     default: false
+  },
+  profileImage: {
+    type: String,
+    default: 'defaultProfileImage.jpg'
   }
 }, { timestamps: true });
 
