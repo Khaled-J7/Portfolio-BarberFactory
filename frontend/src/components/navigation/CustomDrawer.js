@@ -18,6 +18,7 @@ const DRAWER_WIDTH = width * 0.75;
 const CustomDrawer = ({ isVisible, onClose, navigation }) => {
   if (!isVisible) return null;
 
+  // Log Out Function 
   const handleLogout = async () => {
     try {
       await AsyncStorage.clear();

@@ -5,7 +5,7 @@
   - Everything else remains the same (BarberProfileScreen)
 */
 
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import {
   Image,
   Platform,
   Dimensions,
+  TouchableOpacity,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
