@@ -67,7 +67,7 @@ const HomeScreen = ({ navigation }) => {
       },
     });
   };
-
+  // Pull-To-Refresh Feature
   const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
     try {
@@ -106,7 +106,7 @@ const HomeScreen = ({ navigation }) => {
       {/* Title */}
       <Text style={styles.title}>Discover nearby Barbershops</Text>
 
-      {/* Barbershops List */}
+      {/* Updating ScrollView to integrate Pull-To-Refresh feature */}
       <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}
