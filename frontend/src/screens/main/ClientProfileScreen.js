@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
+  TextInput,
   StyleSheet,
   Image,
   TouchableOpacity,
   ScrollView,
-  ImageBackground,
   Alert,
   Modal,
   ActivityIndicator,
@@ -106,20 +106,17 @@ const ClientProfileScreen = ({ navigation }) => {
     profileImage: null,
   });
   const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const [backgroundLoaded, setBackgroundLoaded] = useState(false);
 
   // Load profile data on mount
   useEffect(() => {
     loadProfile();
   }, []);
 
-  /**
-   * Load client profile data
-   */
   const loadProfile = async () => {
     try {
       setIsLoading(true);
       const token = await AsyncStorage.getItem('userToken');
+      
       if (!token) {
         Alert.alert('Error', 'Authentication required');
         return;
@@ -129,7 +126,7 @@ const ClientProfileScreen = ({ navigation }) => {
       setProfileData({
         fullName: data.fullName,
         phoneNumber: data.phoneNumber,
-        profileImage: data.profileImage || require('../../assets/images/defaultProfileImage.jpg')
+        profileImage: data.profileImage || null
       });
     } catch (error) {
       console.error('Load profile error:', error);
@@ -139,9 +136,6 @@ const ClientProfileScreen = ({ navigation }) => {
     }
   };
 
-  /**
-   * Handle profile image selection
-   */
   const handleImagePick = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -168,9 +162,6 @@ const ClientProfileScreen = ({ navigation }) => {
     }
   };
 
-  /**
-   * Handle profile information update
-   */
   const handleUpdateProfile = async (updatedData) => {
     try {
       const token = await AsyncStorage.getItem('userToken');
@@ -187,8 +178,7 @@ const ClientProfileScreen = ({ navigation }) => {
     }
   };
 
-  // Show loading indicator while loading profile
-  if (isLoading || !backgroundLoaded) {
+  if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#000000" />
@@ -197,11 +187,7 @@ const ClientProfileScreen = ({ navigation }) => {
   }
 
   return (
-    <ImageBackground
-      source={require('../../assets/images/backgroundBeigeThemeImage.jpg')}
-      style={styles.container}
-      onLoad={() => setBackgroundLoaded(true)}
-    >
+    <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Profile Image Section */}
         <View style={styles.profileImageSection}>
@@ -265,19 +251,20 @@ const ClientProfileScreen = ({ navigation }) => {
         initialData={profileData}
         onSave={handleUpdateProfile}
       />
-    </ImageBackground>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#C0EBA6',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5F5DC', // Beige color for loading screen
+    backgroundColor: '#C0EBA6',
   },
   profileImageSection: {
     alignItems: 'center',
@@ -299,7 +286,7 @@ const styles = StyleSheet.create({
   },
   imageLoadingOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(245, 245, 220, 0.7)',
+    backgroundColor: 'rgba(192, 235, 166, 0.7)',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 75,
