@@ -1,10 +1,8 @@
 // src/screens/main/HomeScreen.js
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   SafeAreaView,
   TouchableOpacity,
   Image,
@@ -12,13 +10,13 @@ import {
   StatusBar,
   ScrollView,
   ActivityIndicator,
-  Alert,
-} from "react-native";
-import { Feather } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import CustomDrawer from "../../components/navigation/CustomDrawer";
-import BarbershopCard from "../../components/ui/BarbershopCard";
-import shopService from "../../services/shopService";
+  Alert
+} from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import CustomDrawer from '../../components/navigation/CustomDrawer';
+import BarbershopCard from '../../components/ui/BarbershopCard';
+import shopService from '../../services/shopService';
 
 const HomeScreen = ({ navigation }) => {
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
@@ -32,17 +30,18 @@ const HomeScreen = ({ navigation }) => {
   const loadShops = async () => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("userToken");
+      const token = await AsyncStorage.getItem('userToken');
       if (!token) {
-        Alert.alert("Error", "Authentication required");
+        Alert.alert('Error', 'Authentication required');
         return;
       }
 
       const allShops = await shopService.getAllShops(token);
+      console.log('Loaded shops:', allShops); // Debug log
       setShops(allShops);
     } catch (error) {
-      console.error("Error loading shops:", error);
-      Alert.alert("Error", "Failed to load barbershops");
+      console.error('Error loading shops:', error);
+      Alert.alert('Error', 'Failed to load barbershops');
     } finally {
       setLoading(false);
     }
@@ -50,7 +49,20 @@ const HomeScreen = ({ navigation }) => {
 
   const handleBookPress = (shopId) => {
     // Will be implemented when we create the booking system
-    console.log("Booking pressed for shop:", shopId);
+    console.log('Booking pressed for shop:', shopId);
+  };
+
+  const handleShopPress = (shop) => {
+    console.log('Navigating to shop with data:', shop);  // debug log 
+    navigation.navigate('ViewBarberProfile', { 
+      shopData: {
+        coverImage: shop.coverImage,
+        name: shop.name,
+        phone: shop.phone,
+        address: shop.address,
+        galleryImages: shop.galleryImages || []
+      }
+    });
   };
 
   return (
@@ -59,7 +71,9 @@ const HomeScreen = ({ navigation }) => {
 
       {/* Top Bar */}
       <View style={styles.topBar}>
-        <TouchableOpacity onPress={() => setIsDrawerVisible(true)}>
+        <TouchableOpacity
+          onPress={() => setIsDrawerVisible(true)}
+        >
           <Feather name="list" size={24} color="#262525" />
         </TouchableOpacity>
 
@@ -71,7 +85,7 @@ const HomeScreen = ({ navigation }) => {
       {/* Logo */}
       <View style={styles.logoContainer}>
         <Image
-          source={require("../../assets/images/appLogo.png")}
+          source={require('../../assets/images/appLogo.png')}
           style={styles.logo}
           resizeMode="contain"
         />
@@ -97,6 +111,7 @@ const HomeScreen = ({ navigation }) => {
               phone={shop.phone}
               imageUrl={shop.coverImage}
               onBookPress={() => handleBookPress(shop._id)}
+              onPress={() => handleShopPress(shop)}
             />
           ))
         ) : (

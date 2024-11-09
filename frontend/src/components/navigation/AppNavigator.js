@@ -13,6 +13,7 @@ import HomeScreen from '../../screens/main/HomeScreen';
 import CreateShopScreen from '../../screens/main/CreateShopScreen';
 import BarberProfileScreen from '../../screens/main/BarberProfileScreen';
 import SettingsScreen from '../../screens/main/SettingsScreen';
+import ViewBarberProfileScreen from '../../screens/main/ViewBarberProfileScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -92,6 +93,11 @@ export function AppNavigator() {
       
       {/* Other Screens */}
       <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen 
+        name="ViewBarberProfile" 
+        component={ViewBarberProfileScreen} 
+        options={{ headerShown: false }}
+      />
     </Stack.Navigator>
   );
 }

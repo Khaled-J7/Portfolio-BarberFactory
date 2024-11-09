@@ -68,8 +68,9 @@ const shopController = {
       // Get all shops, sorted by newest first
       const shops = await Shop.find()
         .sort({ createdAt: -1 })  // -1 for descending order (newest first)
-        .populate('owner', 'fullName'); // Get owner's name if needed
-
+        .select('name address phone coverImage galleryImages createdAt');  // Select specific fields we need      
+      
+        console.log('Fetched shops:', shops); // Debug log
       res.json(shops);
     } catch (error) {
       console.error('Get all shops error:', error);
