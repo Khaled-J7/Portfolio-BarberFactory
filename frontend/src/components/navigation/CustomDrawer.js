@@ -44,6 +44,7 @@ const CustomDrawer = ({ isVisible, onClose, navigation }) => {
       onPress: () => {
         onClose();
         console.log('About Us pressed');
+        navigation.navigate('About'); 
       }
     },
     { 
