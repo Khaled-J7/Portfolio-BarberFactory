@@ -16,7 +16,7 @@ import CreateShopScreen from '../../screens/main/CreateShopScreen';
 import BarberProfileScreen from '../../screens/main/BarberProfileScreen';
 import SettingsScreen from '../../screens/main/SettingsScreen';
 import ViewBarberProfileScreen from '../../screens/main/ViewBarberProfileScreen';
-
+import AboutScreen from '../screens/main/AboutScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -119,6 +119,8 @@ export function AppNavigator() {
         component={ViewBarberProfileScreen} 
         options={{ headerShown: false }}
       />
+      <Stack.Screen name="About" component={AboutScreen} />
     </Stack.Navigator>
   );
+  
 }
