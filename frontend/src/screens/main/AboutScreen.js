@@ -114,7 +114,7 @@ const AboutScreen = ({ navigation }) => {
             <View style={styles.developers}>
               <View style={styles.developer}>
                 <Image
-                  source={require('../../assets/images/KhaledjallouliImage.jpg')}
+                  source={require('../../assets/images/KhaledJallouliImage.jpg')}
                   style={styles.developerImage}
                 />
                 <Text style={styles.developerName}>Khaled Jallouli</Text>

@@ -82,6 +82,29 @@ const authService = {
       console.error('Login error:', error);
       throw error;
     }
+  },
+
+  // Delete Account
+  deleteAccount: async (token) => {
+    try {
+      const response = await fetch(`${API_URL}/auth/delete-account`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to delete account');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Delete account error:', error);
+      throw error;
+    }
   }
 };
 

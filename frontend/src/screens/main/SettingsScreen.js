@@ -1,5 +1,5 @@
 // src/screens/main/SettingsScreen.js
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,10 +8,12 @@ import {
   SafeAreaView,
   Switch,
   Platform,
-  StatusBar
-} from 'react-native';
-import { Feather } from '@expo/vector-icons';
-import CustomAlert from '../../components/ui/CustomAlert';
+  StatusBar,
+} from "react-native";
+import { Feather } from "@expo/vector-icons";
+import CustomAlert from "../../components/ui/CustomAlert";
+import authService from "../../services/authService";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const SettingsScreen = ({ navigation }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -39,13 +41,13 @@ const SettingsScreen = ({ navigation }) => {
               setIsDarkMode(value);
               setThemeAlertVisible(true);
             }}
-            trackColor={{ false: '#767577', true: '#2ECC71' }}
-            thumbColor={isDarkMode ? '#fff' : '#f4f3f4'}
+            trackColor={{ false: "#767577", true: "#2ECC71" }}
+            thumbColor={isDarkMode ? "#fff" : "#f4f3f4"}
             ios_backgroundColor="#3e3e3e"
           />
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.settingItem}
           onPress={() => setUpdateAlertVisible(true)}
         >
@@ -56,7 +58,7 @@ const SettingsScreen = ({ navigation }) => {
           <Feather name="chevron-right" size={24} color="#262525" />
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.settingItem, styles.deleteItem]}
           onPress={() => setDeleteAlertVisible(true)}
         >
@@ -82,8 +84,25 @@ const SettingsScreen = ({ navigation }) => {
         visible={deleteAlertVisible}
         onClose={() => setDeleteAlertVisible(false)}
         type="delete"
-        onConfirm={() => {
-          console.log('Delete account confirmed');
+        onConfirm={async () => {
+          try {
+            const token = await AsyncStorage.getItem("userToken");
+            if (!token) {
+              Alert.alert("Error", "Authentication required");
+              return;
+            }
+
+            await authService.deleteAccount(token);
+
+            // Clear local storage
+            await AsyncStorage.clear();
+
+            // Navigate to login screen
+            navigation.replace("LoginSignup");
+          } catch (error) {
+            console.error("Delete account error:", error);
+            Alert.alert("Error", "Failed to delete account. Please try again.");
+          }
         }}
       />
     </SafeAreaView>
@@ -99,7 +118,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 15,
     height: 60,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   content: {
     flex: 1,

@@ -3,6 +3,7 @@
  * Handles user registration and login functionality
  */
 
+const Shop = require('../models/Shop');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
@@ -124,6 +125,33 @@ const authController = {
       // DEBUG: Log login error
       console.error('Login error:', error);
       res.status(500).json({ message: 'Server error', error: error.message });
+    }
+  },
+
+  // Add delete controller method
+  deleteAccount: async (req, res) => {
+    try {
+      const userId = req.user.id; // From auth middleware
+      const user = await User.findById(userId);
+  
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      // If user is a barber, delete their shop profile first
+      if (user.isBarber) {
+        const shop = await Shop.findOneAndDelete({ owner: userId });
+        console.log('Deleted shop profile:', shop ? 'Yes' : 'No');
+      }
+  
+      // Delete user account
+      await User.findByIdAndDelete(userId);
+      console.log('User account deleted');
+  
+      res.json({ message: 'Account deleted successfully' });
+    } catch (error) {
+      console.error('Delete account error:', error);
+      res.status(500).json({ message: 'Error deleting account' });
     }
   }
 };
