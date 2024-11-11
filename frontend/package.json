@@ -28,7 +28,8 @@
     "react-native-vector-icons": "^10.2.0",
     "expo-image-picker": "~15.0.7",
     "expo-media-library": "~16.0.5",
-    "expo-camera": "~15.0.16"
+    "expo-camera": "~15.0.16",
+    "react-native-maps": "1.14.0"
   },
   "devDependencies": {
     "@babel/core": "^7.23.7"
