@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -9,18 +9,19 @@ import {
   Modal,
   ActivityIndicator,
   FlatList,
-} from 'react-native';
-import MapView from 'react-native-maps';
-import { Feather } from '@expo/vector-icons';
+  Alert,
+} from "react-native";
+import MapView from "react-native-maps";
+import { Feather } from "@expo/vector-icons";
 
 const ExploreScreen = () => {
   // States
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [region, setRegion] = useState({
-    latitude: 36.8065,  // Tunisia default
+    latitude: 36.8065, // Tunisia default
     longitude: 10.1815,
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
@@ -41,20 +42,45 @@ const ExploreScreen = () => {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
           query
-        )}&limit=5`
+        )}&limit=5`,
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            // Add a User-Agent header as required by Nominatim's usage policy
+            "User-Agent": "BarberFactory-App",
+          },
+        }
       );
-      const data = await response.json();
-      
-      const formattedResults = data.map(item => ({
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const text = await response.text(); // Get response as text first
+      let data;
+      try {
+        data = JSON.parse(text); // Try to parse the text as JSON
+      } catch (e) {
+        console.error("Failed to parse response:", text);
+        throw new Error("Invalid response format");
+      }
+
+      const formattedResults = data.map((item) => ({
         id: item.place_id,
         name: item.display_name,
         latitude: parseFloat(item.lat),
-        longitude: parseFloat(item.lon)
+        longitude: parseFloat(item.lon),
       }));
 
       setSearchResults(formattedResults);
     } catch (error) {
-      console.error('Search error:', error);
+      console.error("Search error:", error);
+      // Show error to user
+      Alert.alert(
+        "Search Error",
+        "Failed to search location. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -63,7 +89,7 @@ const ExploreScreen = () => {
   // Handle search input changes
   const handleSearchChange = (text) => {
     setSearchQuery(text);
-    
+
     // Clear previous timeout
     if (searchTimeout.current) {
       clearTimeout(searchTimeout.current);
@@ -121,10 +147,10 @@ const ExploreScreen = () => {
         {isLoading ? (
           <ActivityIndicator style={styles.searchIcon} color="#2ECC71" />
         ) : (
-          <Feather 
-            name="search" 
-            size={20} 
-            color="#2ECC71" 
+          <Feather
+            name="search"
+            size={20}
+            color="#2ECC71"
             style={styles.searchIcon}
           />
         )}
@@ -154,7 +180,7 @@ const ExploreScreen = () => {
       {/* Map Container */}
       <View style={styles.mapContainer}>
         <MapComponent />
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.fullScreenButton}
           onPress={() => setIsFullScreen(true)}
         >
@@ -163,13 +189,10 @@ const ExploreScreen = () => {
       </View>
 
       {/* Full Screen Map Modal */}
-      <Modal
-        visible={isFullScreen}
-        animationType="slide"
-      >
+      <Modal visible={isFullScreen} animationType="slide">
         <View style={styles.fullScreenContainer}>
           <MapComponent />
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.closeButton}
             onPress={() => setIsFullScreen(false)}
           >
@@ -184,31 +207,31 @@ const ExploreScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    backgroundColor: "#fff",
+    paddingTop: Platform.OS === "ios" ? 60 : 40,
     paddingHorizontal: 20,
     paddingBottom: 65, // Added to account for tab bar
   },
   title: {
-    fontFamily: 'BebasNeue-Regular',
+    fontFamily: "BebasNeue-Regular",
     fontSize: 32,
-    color: '#262525',
+    color: "#262525",
     marginBottom: 20,
   },
   searchContainer: {
-    position: 'relative',
+    position: "relative",
     marginBottom: 10,
   },
   searchInput: {
     height: 50,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: "#F5F5F5",
     borderRadius: 25,
     paddingHorizontal: 20,
     paddingRight: 50,
     fontSize: 16,
-    color: '#262525',
-    fontFamily: 'Poppins-Regular',
-    shadowColor: '#000',
+    color: "#262525",
+    fontFamily: "Poppins-Regular",
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -218,16 +241,16 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   searchIcon: {
-    position: 'absolute',
+    position: "absolute",
     right: 20,
     top: 15,
   },
   resultsContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 10,
     maxHeight: 200,
     marginBottom: 10,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -237,24 +260,24 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   resultItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: "#f0f0f0",
   },
   resultText: {
     marginLeft: 10,
-    fontFamily: 'Poppins-Regular',
+    fontFamily: "Poppins-Regular",
     fontSize: 14,
-    color: '#262525',
+    color: "#262525",
     flex: 1,
   },
   mapContainer: {
     flex: 1,
     borderRadius: 20,
-    overflow: 'hidden',
-    position: 'relative',
+    overflow: "hidden",
+    position: "relative",
     marginBottom: 20, // Added space before tab bar
   },
   map: {
@@ -265,13 +288,13 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   fullScreenButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 10,
     right: 10,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 20,
     padding: 10,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -282,18 +305,18 @@ const styles = StyleSheet.create({
   },
   fullScreenContainer: {
     flex: 1,
-    position: 'relative',
+    position: "relative",
   },
   closeButton: {
-    position: 'absolute',
-    top: Platform.OS === 'ios' ? 50 : 30,
+    position: "absolute",
+    top: Platform.OS === "ios" ? 50 : 30,
     right: 20,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: "rgba(0,0,0,0.5)",
     borderRadius: 20,
     width: 40,
     height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 
