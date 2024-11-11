@@ -1,15 +1,20 @@
+/**
+ * Main Navigation Configuration
+ * Handles both Stack and Tab Navigation for the entire app
+ */
+
 import React, { useState, useEffect } from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather } from "@expo/vector-icons";
 
-// Auth Screens
+// Auth Screen Imports
 import SplashScreen from "../../screens/auth/SplashScreen";
 import LoginSignupScreen from "../../screens/auth/LoginSignupScreen";
 import WelcomeBarberScreen from "../../screens/auth/WelcomeBarberScreen";
 
-// Main Screens
+// Main Screen Imports
 import HomeScreen from "../../screens/main/HomeScreen";
 import ClientProfileScreen from "../../screens/main/ClientProfileScreen";
 import CreateShopScreen from "../../screens/main/CreateShopScreen";
@@ -19,10 +24,15 @@ import ViewBarberProfileScreen from "../../screens/main/ViewBarberProfileScreen"
 import AboutScreen from "../../screens/main/AboutScreen";
 import ExploreScreen from "../../screens/main/ExploreScreen";
 
+// Navigation Creators
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// Bottom Tab Navigator
+/**
+ * Bottom Tab Navigator Component
+ * Handles the main app's bottom navigation
+ * Different profile screens based on user type (Barber/Client)
+ */
 function MainTabNavigator() {
   const [isBarber, setIsBarber] = useState(false);
 
@@ -44,6 +54,7 @@ function MainTabNavigator() {
 
   return (
     <Tab.Navigator
+      initialRouteName="Home"
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
@@ -58,9 +69,10 @@ function MainTabNavigator() {
         tabBarInactiveTintColor: "#262525",
       }}
     >
+      {/* Explore Tab - Map and Location Search */}
       <Tab.Screen
         name="Explore"
-        component={HomeScreen}
+        component={ExploreScreen}
         options={{
           tabBarIcon: ({ color }) => (
             <Feather name="search" size={24} color={color} />
@@ -68,6 +80,8 @@ function MainTabNavigator() {
           tabBarLabelStyle: { fontFamily: "Poppins-Regular" },
         }}
       />
+
+      {/* Home Tab - Main Feed */}
       <Tab.Screen
         name="Home"
         component={HomeScreen}
@@ -78,6 +92,8 @@ function MainTabNavigator() {
           tabBarLabelStyle: { fontFamily: "Poppins-Regular" },
         }}
       />
+
+      {/* Profile Tab - Conditional Rendering based on User Type */}
       <Tab.Screen
         name="Profile"
         component={isBarber ? BarberProfileScreen : ClientProfileScreen}
@@ -88,9 +104,11 @@ function MainTabNavigator() {
           tabBarLabelStyle: { fontFamily: "Poppins-Regular" },
         }}
       />
+
+      {/* Bookings Tab - Appointment Management */}
       <Tab.Screen
         name="Bookings"
-        component={HomeScreen}
+        component={HomeScreen} // Placeholder until BookingsScreen is implemented
         options={{
           tabBarIcon: ({ color }) => (
             <Feather name="calendar" size={24} color={color} />
@@ -102,7 +120,11 @@ function MainTabNavigator() {
   );
 }
 
-// Main Stack Navigator
+/**
+ * Main App Navigator
+ * Handles the overall navigation structure of the app
+ * Including authentication flow and main app flow
+ */
 export function AppNavigator() {
   return (
     <Stack.Navigator
@@ -112,33 +134,22 @@ export function AppNavigator() {
         gestureEnabled: false,
       }}
     >
-      {/* Auth Screens */}
+      {/* Authentication Flow Screens */}
       <Stack.Screen name="Splash" component={SplashScreen} />
       <Stack.Screen name="LoginSignup" component={LoginSignupScreen} />
       <Stack.Screen name="WelcomeBarber" component={WelcomeBarberScreen} />
       <Stack.Screen name="CreateShop" component={CreateShopScreen} />
 
-      {/* Main App Flow */}
+      {/* Main App Flow - Contains Tab Navigator */}
       <Stack.Screen name="MainApp" component={MainTabNavigator} />
 
-      {/* Other Screens */}
+      {/* Additional Screens - Accessible from anywhere */}
       <Stack.Screen name="Settings" component={SettingsScreen} />
-      <Stack.Screen
-        name="ViewBarberProfile"
-        component={ViewBarberProfileScreen}
-        options={{ headerShown: false }}
+      <Stack.Screen 
+        name="ViewBarberProfile" 
+        component={ViewBarberProfileScreen} 
       />
       <Stack.Screen name="About" component={AboutScreen} />
-      <Tab.Screen
-        name="Explore"
-        component={ExploreScreen}
-        options={{
-          tabBarIcon: ({ color }) => (
-            <Feather name="search" size={24} color={color} />
-          ),
-          tabBarLabelStyle: { fontFamily: "Poppins-Regular" },
-        }}
-      />
     </Stack.Navigator>
   );
 }
