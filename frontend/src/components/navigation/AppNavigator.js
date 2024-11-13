@@ -24,6 +24,10 @@ import ViewBarberProfileScreen from "../../screens/main/ViewBarberProfileScreen"
 import AboutScreen from "../../screens/main/AboutScreen";
 import ExploreScreen from "../../screens/main/ExploreScreen";
 
+// Booking Screen Imports
+import BarberBookingsScreen from "../../screens/booking/BarberBookingsScreen";
+import ClientBookingsScreen from "../../screens/booking/ClientBookingsScreen";
+
 // Navigation Creators
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -108,7 +112,7 @@ function MainTabNavigator() {
       {/* Bookings Tab - Appointment Management */}
       <Tab.Screen
         name="Bookings"
-        component={HomeScreen} // Placeholder until BookingsScreen is implemented
+        component={isBarber ? BarberBookingsScreen : ClientBookingsScreen}
         options={{
           tabBarIcon: ({ color }) => (
             <Feather name="calendar" size={24} color={color} />
