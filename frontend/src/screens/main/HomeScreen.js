@@ -26,6 +26,8 @@ const HomeScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [shops, setShops] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [selectedShop, setSelectedShop] = useState(null);
   useEffect(() => {
     loadShops();
   }, []);
@@ -50,9 +52,10 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
-  const handleBookPress = (shopId) => {
-    // Will be implemented when we create the booking system
-    console.log("Booking pressed for shop:", shopId);
+  // Book Button
+  const handleBookPress = (shop) => {
+    setSelectedShop(shop);
+    setShowBookingModal(true);
   };
 
   const handleShopPress = (shop) => {
@@ -151,6 +154,11 @@ const HomeScreen = ({ navigation }) => {
         isVisible={isDrawerVisible}
         onClose={() => setIsDrawerVisible(false)}
         navigation={navigation}
+      />
+      <BookingModal
+        visible={showBookingModal}
+        onClose={() => setShowBookingModal(false)}
+        shopData={selectedShop}
       />
     </SafeAreaView>
   );
