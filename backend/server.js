@@ -38,6 +38,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', require('./src/routes/authRoutes'));
 app.use('/api/shop', require('./src/routes/shopRoutes'));
 app.use('/api/client', require('./src/routes/clientRoutes'));
+app.use('/api/booking', require('./src/routes/bookingRoutes'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
