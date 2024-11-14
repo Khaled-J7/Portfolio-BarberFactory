@@ -1,11 +1,4 @@
-//  src/screens/main/ViewBarberProfileScreen.js (read-only mode for BarberProfileScreen)
-/*
-  - Removed interactive elements
-  - Added back navigation
-  - Everything else remains the same (BarberProfileScreen)
-*/
-
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -18,21 +11,64 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import BookingModal from "../booking/BookingModal";
 
 const { width } = Dimensions.get("window");
 
 const ViewBarberProfileScreen = ({ route, navigation }) => {
   const { shopData } = route.params;
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [isShopOwner, setIsShopOwner] = useState(false);
+
   useEffect(() => {
-    console.log("Shop Data in ViewBarberProfileScreen:", shopData); // Debug
-  }, [shopData]);
+    checkOwnership();
+  }, []);
+
+  /**
+   * Check if current user is the shop owner
+   */
+  const checkOwnership = async () => {
+    try {
+      const userData = await AsyncStorage.getItem("userData");
+      if (userData) {
+        const parsedData = JSON.parse(userData);
+        console.log("Current user data:", parsedData);
+        console.log("Shop data:", shopData);
+
+        // Compare user ID with shop owner ID
+        if (shopData.owner) {
+          const isOwner = parsedData.id === shopData.owner;
+          console.log("Is owner check:", isOwner);
+          setIsShopOwner(isOwner);
+        } else {
+          console.log("Shop owner ID not found in shop data");
+          setIsShopOwner(false);
+        }
+      }
+    } catch (error) {
+      console.error("Error checking ownership:", error);
+      setIsShopOwner(false);
+    }
+  };
+
+  /**
+   * Handle booking modal close
+   */
+  const handleCloseModal = () => {
+    setShowBookingModal(false);
+  };
 
   return (
     <ImageBackground
       source={require("../../assets/images/BlackThemeBackgroundImage.jpg")}
       style={styles.container}
     >
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: !isShopOwner ? 100 : 20 }}
+      >
         {/* Back Button */}
         <View style={styles.header}>
           <TouchableOpacity
@@ -86,7 +122,7 @@ const ViewBarberProfileScreen = ({ route, navigation }) => {
           </View>
 
           <View style={styles.galleryGrid}>
-            {shopData.galleryImages.map((image, index) => (
+            {shopData.galleryImages?.map((image, index) => (
               <View key={index} style={styles.galleryImageContainer}>
                 <Image source={{ uri: image }} style={styles.galleryImage} />
               </View>
@@ -94,6 +130,33 @@ const ViewBarberProfileScreen = ({ route, navigation }) => {
           </View>
         </View>
       </ScrollView>
+
+      {/* Booking Button - Only shown if not shop owner */}
+      {!isShopOwner && (
+        <View style={styles.bookingButtonContainer}>
+          <TouchableOpacity
+            style={styles.bookingButton}
+            onPress={() => setShowBookingModal(true)}
+          >
+            <LinearGradient
+              colors={["#2ECC71", "#27AE60"]}
+              style={styles.bookingGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            >
+              <Text style={styles.bookingButtonText}>Book Now</Text>
+              <Feather name="calendar" size={20} color="#FFFFFF" />
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Booking Modal */}
+      <BookingModal
+        visible={showBookingModal}
+        onClose={handleCloseModal}
+        shopData={shopData}
+      />
     </ImageBackground>
   );
 };
@@ -173,6 +236,32 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     borderRadius: 10,
+  },
+  // New styles for booking button
+  bookingButtonContainer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 20,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    backdropFilter: "blur(10px)",
+  },
+  bookingButton: {
+    borderRadius: 25,
+    overflow: "hidden",
+  },
+  bookingGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 15,
+    gap: 10,
+  },
+  bookingButtonText: {
+    fontFamily: "Poppins-Bold",
+    fontSize: 16,
+    color: "#FFFFFF",
   },
 });
 

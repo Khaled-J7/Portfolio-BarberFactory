@@ -428,6 +428,8 @@ const styles = StyleSheet.create({
   },
   menuButton: {
     padding: 5,
+    borderRadius: 20,
+    backgroundColor: 'rgba(110, 194, 7, 0.1)',
   },
   infoItem: {
     paddingVertical: 15,
@@ -461,6 +463,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 20,
+    marginLeft: 'auto',
   },
   addButtonText: {
     fontFamily: 'Poppins-Regular',

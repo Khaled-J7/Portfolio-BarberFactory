@@ -9,23 +9,27 @@ const User = require('../models/User');
 const bookingController = {
     /**
      * Create a new booking
-     * Can be used by both clients and barbers
+     * Only clients can create bookings
      */
     createBooking: async (req, res) => {
         try {
             const { shopId, date, time } = req.body;
-            const clientId = req.user.id; // From auth middleware
+            const clientId = req.user.id;
+
+            // Verify user is a client
+            const client = await User.findById(clientId);
+            if (!client || client.isBarber) {
+                return res.status(403).json({ 
+                    message: 'Only clients can create bookings' 
+                });
+            }
 
             // Verify shop exists
             const shop = await Shop.findById(shopId);
             if (!shop) {
-                return res.status(404).json({ message: 'Shop not found' });
-            }
-
-            // Get client details
-            const client = await User.findById(clientId);
-            if (!client) {
-                return res.status(404).json({ message: 'Client not found' });
+                return res.status(404).json({ 
+                    message: 'Shop not found' 
+                });
             }
 
             // Check if timeslot is available
@@ -37,10 +41,12 @@ const bookingController = {
             });
 
             if (existingBooking) {
-                return res.status(400).json({ message: 'Time slot not available' });
+                return res.status(400).json({ 
+                    message: 'Time slot not available' 
+                });
             }
 
-            // Create the booking
+            // Create booking
             const booking = await Booking.create({
                 client: clientId,
                 shop: shopId,
@@ -51,80 +57,90 @@ const bookingController = {
                 status: 'PENDING'
             });
 
-            console.log('New booking created:', booking);
             res.status(201).json(booking);
         } catch (error) {
             console.error('Create booking error:', error);
-            res.status(500).json({ message: 'Server error', error: error.message });
+            res.status(500).json({ 
+                message: 'Server error', 
+                error: error.message 
+            });
         }
     },
 
     /**
-     * Get bookings for the current user
-     * For barbers: Returns both their shop's bookings and their personal bookings
-     * For clients: Returns only their bookings
+     * Get bookings based on user type
+     * Clients: Get their bookings
+     * Barbers: Get bookings for their shop
      */
     getBookings: async (req, res) => {
         try {
             const userId = req.user.id;
             const user = await User.findById(userId);
 
-            let response = {
-                myBookings: [], // Bookings made by the user
-                shopBookings: [] // Only for barbers: bookings at their shop
-            };
-
-            // Get user's personal bookings (both clients and barbers)
-            response.myBookings = await Booking.find({ client: userId })
-                .sort({ date: -1 })
-                .populate('shop', 'name address');
-
-            // If user is a barber, get their shop's bookings
             if (user.isBarber) {
+                // Get bookings for barber's shop
                 const shop = await Shop.findOne({ owner: userId });
-                if (shop) {
-                    response.shopBookings = await Booking.find({ shop: shop._id })
-                        .sort({ date: 1 })
-                        .populate('client', 'fullName phoneNumber');
+                if (!shop) {
+                    return res.status(404).json({ 
+                        message: 'Shop not found' 
+                    });
                 }
-            }
 
-            res.json(response);
+                const bookings = await Booking.find({ shop: shop._id })
+                    .sort({ date: 1, time: 1 })
+                    .populate('client', 'fullName phoneNumber');
+
+                res.json(bookings);
+            } else {
+                // Get client's bookings
+                const bookings = await Booking.find({ client: userId })
+                    .sort({ date: -1, time: 1 })
+                    .populate('shop', 'name address phone');
+
+                res.json(bookings);
+            }
         } catch (error) {
             console.error('Get bookings error:', error);
-            res.status(500).json({ message: 'Server error', error: error.message });
+            res.status(500).json({ 
+                message: 'Server error', 
+                error: error.message 
+            });
         }
     },
 
     /**
-     * Update booking status (Confirm/Decline)
-     * Only the shop owner can update booking status
+     * Update booking status
+     * Only shop owners can update booking status
      */
     updateBookingStatus: async (req, res) => {
         try {
             const { bookingId, status } = req.body;
             
-            // Find the booking
             const booking = await Booking.findById(bookingId);
             if (!booking) {
-                return res.status(404).json({ message: 'Booking not found' });
+                return res.status(404).json({ 
+                    message: 'Booking not found' 
+                });
             }
 
-            // Verify the user owns the shop
+            // Verify the shop owner
             const shop = await Shop.findById(booking.shop);
             if (!shop || shop.owner.toString() !== req.user.id) {
-                return res.status(403).json({ message: 'Not authorized to update this booking' });
+                return res.status(403).json({ 
+                    message: 'Not authorized to update this booking' 
+                });
             }
 
-            // Update status
             booking.status = status;
             await booking.save();
 
-            console.log(`Booking ${bookingId} status updated to ${status}`);
             res.json(booking);
         } catch (error) {
             console.error('Update booking status error:', error);
-            res.status(500).json({ message: 'Server error', error: error.message });
+            res.status(500).json({ 
+                message: 'Server error', 
+                error: error.message 
+            });
         }
     }
 };

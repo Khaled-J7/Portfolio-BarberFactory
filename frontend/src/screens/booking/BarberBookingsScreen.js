@@ -16,27 +16,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import bookingService from '../../services/bookingService';
 
 /**
- * Booking Card Component
- * Displays individual booking information
+ * BookingCard Component
+ * Displays individual booking information with actions
  */
-const BookingCard = ({ booking, isShopBooking = false, onStatusUpdate }) => {
+const BookingCard = ({ booking, onStatusUpdate }) => {
   const [expanded, setExpanded] = useState(false);
 
-  // Format date and time for display
+  // Format date and time
   const formattedDate = bookingService.formatDate(booking.date);
   const formattedTime = bookingService.formatTime(booking.time);
-
-  /**
-   * Handle status update (confirm/decline)
-   */
-  const handleStatusUpdate = async (status) => {
-    try {
-      await onStatusUpdate(booking._id, status);
-      setExpanded(false);
-    } catch (error) {
-      Alert.alert('Error', error.message);
-    }
-  };
 
   return (
     <LinearGradient
@@ -46,11 +34,9 @@ const BookingCard = ({ booking, isShopBooking = false, onStatusUpdate }) => {
       end={{ x: 1, y: 1 }}
     >
       <View style={styles.cardContent}>
-        {/* Main Booking Info */}
-        <View style={styles.bookingInfo}>
-          <Text style={styles.name}>
-            {isShopBooking ? booking.clientName : booking.shopName}
-          </Text>
+        {/* Client Info */}
+        <View style={styles.infoSection}>
+          <Text style={styles.clientName}>{booking.clientName}</Text>
           <View style={styles.timeInfo}>
             <Feather name="calendar" size={16} color="#262525" />
             <Text style={styles.dateTimeText}>
@@ -60,9 +46,9 @@ const BookingCard = ({ booking, isShopBooking = false, onStatusUpdate }) => {
         </View>
 
         {/* Status Section */}
-        {isShopBooking && booking.status === 'PENDING' ? (
+        {booking.status === 'PENDING' ? (
           <TouchableOpacity
-            style={styles.expandButton}
+            style={styles.actionButton}
             onPress={() => setExpanded(!expanded)}
           >
             <Feather
@@ -77,27 +63,27 @@ const BookingCard = ({ booking, isShopBooking = false, onStatusUpdate }) => {
             booking.status === 'CONFIRMED' ? styles.confirmedBadge : styles.declinedBadge
           ]}>
             <Text style={styles.statusText}>
-              {booking.status === 'CONFIRMED' ? 'CONFIRMED ✓' : 'DECLINED ✗'}
+              {booking.status === 'CONFIRMED' ? 'Confirmed ✓' : 'Declined ✗'}
             </Text>
           </View>
         )}
       </View>
 
-      {/* Expanded Actions Section */}
-      {isShopBooking && expanded && booking.status === 'PENDING' && (
-        <View style={styles.expandedContent}>
+      {/* Expanded Actions */}
+      {expanded && booking.status === 'PENDING' && (
+        <View style={styles.expandedActions}>
           <TouchableOpacity
-            style={[styles.actionButton, styles.confirmButton]}
-            onPress={() => handleStatusUpdate('CONFIRMED')}
+            style={[styles.actionBtn, styles.confirmBtn]}
+            onPress={() => onStatusUpdate(booking._id, 'CONFIRMED')}
           >
-            <Text style={styles.actionButtonText}>Confirm</Text>
+            <Text style={styles.actionBtnText}>Confirm</Text>
           </TouchableOpacity>
           
           <TouchableOpacity
-            style={[styles.actionButton, styles.declineButton]}
-            onPress={() => handleStatusUpdate('DECLINED')}
+            style={[styles.actionBtn, styles.declineBtn]}
+            onPress={() => onStatusUpdate(booking._id, 'DECLINED')}
           >
-            <Text style={styles.actionButtonText}>Decline</Text>
+            <Text style={styles.actionBtnText}>Decline</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -109,42 +95,34 @@ const BookingCard = ({ booking, isShopBooking = false, onStatusUpdate }) => {
  * Main BarberBookingsScreen Component
  */
 const BarberBookingsScreen = () => {
+  const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [shopBookings, setShopBookings] = useState([]);
-  const [personalBookings, setPersonalBookings] = useState([]);
-  const [activeTab, setActiveTab] = useState('shop'); // 'shop' or 'personal'
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     loadBookings();
   }, []);
 
-  /**
-   * Load all bookings (both shop and personal)
-   */
   const loadBookings = async () => {
     try {
       setLoading(true);
+      setError(null);
       const token = await AsyncStorage.getItem('userToken');
-      
       if (!token) {
-        Alert.alert('Error', 'Authentication required');
+        setError('Authentication required');
         return;
       }
 
-      const response = await bookingService.getBookings(token);
-      setShopBookings(response.shopBookings);
-      setPersonalBookings(response.myBookings);
+      const fetchedBookings = await bookingService.getBookings(token);
+      setBookings(fetchedBookings);
     } catch (error) {
-      Alert.alert('Error', 'Failed to load bookings');
-      console.error(error);
+      setError(error.message || 'Failed to load bookings');
+      Alert.alert('Error', error.message || 'Failed to load bookings');
     } finally {
       setLoading(false);
     }
   };
 
-  /**
-   * Handle booking status update
-   */
   const handleStatusUpdate = async (bookingId, status) => {
     try {
       const token = await AsyncStorage.getItem('userToken');
@@ -155,9 +133,9 @@ const BarberBookingsScreen = () => {
       
       // Refresh bookings after update
       loadBookings();
-      Alert.alert('Success', Booking `${status.toLowerCase()}` ,successfully);//i modifi this line !!!
+      Alert.alert('Success', `Booking ${status.toLowerCase()} successfully`);
     } catch (error) {
-      Alert.alert('Error', error.message);
+      Alert.alert('Error', error.message || 'Failed to update booking status');
     }
   };
 
@@ -176,65 +154,29 @@ const BarberBookingsScreen = () => {
       {/* Header */}
       <Text style={styles.headerTitle}>Bookings</Text>
 
-      {/* Tab Buttons */}
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tabButton, activeTab === 'shop' && styles.activeTabButton]}
-          onPress={() => setActiveTab('shop')}
-        >
-          <Text style={[
-            styles.tabButtonText,
-            activeTab === 'shop' && styles.activeTabButtonText
-          ]}>
-            Shop Bookings
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tabButton, activeTab === 'personal' && styles.activeTabButton]}
-          onPress={() => setActiveTab('personal')}
-        >
-          <Text style={[
-            styles.tabButtonText,
-            activeTab === 'personal' && styles.activeTabButtonText
-          ]}>
-            My Bookings
-          </Text>
-        </TouchableOpacity>
-      </View>
-
       {/* Bookings List */}
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {activeTab === 'shop' ? (
-          shopBookings.length > 0 ? (
-            shopBookings.map((booking) => (
-              <BookingCard
-                key={booking._id}
-                booking={booking}
-                isShopBooking={true}
-                onStatusUpdate={handleStatusUpdate}
-              />
-            ))
-          ) : (
-            <Text style={styles.emptyText}>No shop bookings yet</Text>
-          )
-        ) : (
-          personalBookings.length > 0 ? (
-            personalBookings.map((booking) => (
-              <BookingCard
-                key={booking._id}
-                booking={booking}
-                isShopBooking={false}
-              />
-            ))
-          ) : (
-            <Text style={styles.emptyText}>No personal bookings yet</Text>
-          )
-        )}
-      </ScrollView>
+      {bookings.length > 0 ? (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {bookings.map((booking) => (
+            <BookingCard
+              key={booking._id}
+              booking={booking}
+              onStatusUpdate={handleStatusUpdate}
+            />
+          ))}
+        </ScrollView>
+      ) : (
+        <View style={styles.emptyContainer}>
+          <Feather name="calendar" size={50} color="#C0C0C0" />
+          <Text style={styles.emptyText}>No bookings yet</Text>
+          <Text style={styles.emptySubText}>
+            Your shop's booking requests will appear here
+          </Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -245,42 +187,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     paddingTop: Platform.OS === 'ios' ? 60 : StatusBar.currentHeight + 20,
   },
-  headerTitle: {
-    fontFamily: 'BebasNeue-Regular',
-    fontSize: 32,
-    color: '#262525',
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
   },
-  tabContainer: {
-    flexDirection: 'row',
+  headerTitle: {
+    fontFamily: 'BebasNeue-Regular',
+    fontSize: 32,
+    color: '#262525',
     paddingHorizontal: 20,
     marginBottom: 20,
-  },
-  tabButton: {
-    flex: 1,
-    paddingVertical: 12,
-    marginHorizontal: 5,
-    borderRadius: 10,
-    backgroundColor: '#F5F5F5',
-    alignItems: 'center',
-  },
-  activeTabButton: {
-    backgroundColor: '#2ECC71',
-  },
-  tabButtonText: {
-    fontFamily: 'Poppins-Bold',
-    fontSize: 14,
-    color: '#262525',
-  },
-  activeTabButtonText: {
-    color: '#FFFFFF',
   },
   scrollContent: {
     padding: 20,
@@ -293,15 +211,15 @@ const styles = StyleSheet.create({
     borderColor: '#E5E5E5',
   },
   cardContent: {
+    padding: 15,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 15,
   },
-  bookingInfo: {
+  infoSection: {
     flex: 1,
   },
-  name: {
+  clientName: {
     fontFamily: 'Poppins-Bold',
     fontSize: 16,
     color: '#262525',
@@ -317,30 +235,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666666',
   },
-  expandButton: {
+  actionButton: {
     padding: 5,
   },
-  expandedContent: {
+  expandedActions: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     padding: 15,
     borderTopWidth: 1,
     borderTopColor: '#E5E5E5',
   },
-  actionButton: {
+  actionBtn: {
     paddingVertical: 8,
     paddingHorizontal: 20,
     borderRadius: 20,
     minWidth: 100,
     alignItems: 'center',
   },
-  confirmButton: {
+  confirmBtn: {
     backgroundColor: '#2ECC71',
   },
-  declineButton: {
+  declineBtn: {
     backgroundColor: '#FF3B30',
   },
-  actionButtonText: {
+  actionBtnText: {
     fontFamily: 'Poppins-Bold',
     fontSize: 14,
     color: '#FFFFFF',
@@ -359,13 +277,25 @@ const styles = StyleSheet.create({
   statusText: {
     fontFamily: 'Poppins-Bold',
     fontSize: 12,
+    color: '#262525',
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   emptyText: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: 18,
+    color: '#262525',
+    marginTop: 15,
+  },
+  emptySubText: {
     fontFamily: 'Poppins-Regular',
-    fontSize: 16,
+    fontSize: 14,
     color: '#666666',
     textAlign: 'center',
-    marginTop: 20,
+    marginTop: 5,
   },
 });
 

@@ -1,26 +1,20 @@
 /**
  * Booking Service
- * Handles all API calls related to bookings
+ * Handles all booking-related API calls
  */
 const API_URL = 'https://barber-factory-api.onrender.com/api';
 
 const bookingService = {
     /**
-     * Create a new booking
-     * @param {Object} bookingData - Booking information
-     * @param {string} bookingData.shopId - ID of the shop
-     * @param {string} bookingData.date - Date of the booking
-     * @param {string} bookingData.time - Time slot
-     * @param {string} token - User's authentication token
+     * Create a new booking (clients only)
      */
     createBooking: async (bookingData, token) => {
         try {
-            console.log('Creating booking with data:', bookingData);
-            const response = await fetch(`${API_URL}/booking/create`, { // Add backticks for template literal
+            const response = await fetch(`${API_URL}/booking/create`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` // Wrap in backticks for template literal
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(bookingData)
             });
@@ -39,15 +33,15 @@ const bookingService = {
     },
 
     /**
-     * Get all bookings for the user
-     * Returns different data based on user type (client/barber)
-     * @param {string} token - User's authentication token
+     * Get bookings based on user type
+     * Clients: Get their bookings
+     * Barbers: Get bookings for their shop
      */
     getBookings: async (token) => {
         try {
-            const response = await fetch(`${API_URL}/booking/all`, { // Add backticks for template literal
+            const response = await fetch(`${API_URL}/booking/all`, {
                 headers: {
-                    'Authorization': `Bearer ${token}` // Wrap in backticks for template literal
+                    'Authorization': `Bearer ${token}`
                 }
             });
 
@@ -57,8 +51,6 @@ const bookingService = {
                 throw new Error(data.message || 'Failed to fetch bookings');
             }
 
-            // For clients: data.myBookings
-            // For barbers: data.myBookings + data.shopBookings
             return data;
         } catch (error) {
             console.error('Get bookings error:', error);
@@ -67,21 +59,15 @@ const bookingService = {
     },
 
     /**
-     * Update booking status (Confirm/Decline)
-     * Only for barbers to manage their shop's bookings
-     * @param {Object} statusData - Status update information
-     * @param {string} statusData.bookingId - ID of the booking to update
-     * @param {string} statusData.status - New status ('CONFIRMED' or 'DECLINED')
-     * @param {string} token - User's authentication token
+     * Update booking status (barbers only)
      */
     updateBookingStatus: async (statusData, token) => {
         try {
-            console.log('Updating booking status:', statusData);
-            const response = await fetch(`${API_URL}/booking/status`, { // Add backticks for template literal
+            const response = await fetch(`${API_URL}/booking/status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` // Wrap in backticks for template literal
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(statusData)
             });
@@ -100,9 +86,7 @@ const bookingService = {
     },
 
     /**
-     * Helper function to format date for display
-     * @param {Date} date - Date object to format
-     * @returns {string} Formatted date string
+     * Format date for display
      */
     formatDate: (date) => {
         return new Date(date).toLocaleDateString('en-US', {
@@ -113,13 +97,10 @@ const bookingService = {
     },
 
     /**
-     * Helper function to format time for display
-     * @param {string} time - Time string to format
-     * @returns {string} Formatted time string
+     * Format time for display
      */
     formatTime: (time) => {
-        // Assuming time is in 24-hour format (e.g., "14:00")
-        return new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', { // Add backticks for template literal
+        return new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
             hour: 'numeric',
             minute: 'numeric',
             hour12: true

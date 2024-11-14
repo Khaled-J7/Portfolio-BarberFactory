@@ -1,35 +1,28 @@
-/**
- * Booking Routes
- * Defines API endpoints for booking management
- */
 const express = require('express');
 const router = express.Router();
 const bookingController = require('../controllers/bookingController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
-// Protect all routes with authentication
+// Protect all routes
 router.use(authMiddleware);
 
 /**
  * POST /api/booking/create
- * Create a new booking
- * @body {Object} bookingData (shopId, date, time)
+ * Create a new booking (clients only)
  */
 router.post('/create', bookingController.createBooking);
 
 /**
  * GET /api/booking/all
- * Get all bookings for the user
- * - For barbers: Returns both personal bookings and shop bookings
- * - For clients: Returns only their bookings
+ * Get bookings based on user type:
+ * - Clients: Get their bookings
+ * - Barbers: Get bookings for their shop
  */
 router.get('/all', bookingController.getBookings);
 
 /**
  * PUT /api/booking/status
- * Update booking status (confirm/decline)
- * Only accessible by shop owners
- * @body {Object} statusData (bookingId, status)
+ * Update booking status (barbers only)
  */
 router.put('/status', bookingController.updateBookingStatus);
 

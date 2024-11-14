@@ -4,8 +4,9 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  ActivityIndicator,
+  TouchableOpacity,
   Alert,
+  ActivityIndicator,
   Platform,
   StatusBar,
 } from 'react-native';
@@ -15,18 +16,39 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import bookingService from '../../services/bookingService';
 
 /**
- * Booking Card Component
- * Displays individual booking information
+ * BookingCard Component
+ * Displays individual booking information with status
  */
 const BookingCard = ({ booking }) => {
-  // Format date and time for display
+  // Format date and time
   const formattedDate = bookingService.formatDate(booking.date);
   const formattedTime = bookingService.formatTime(booking.time);
 
-  // Determine status styles
-  const isConfirmed = booking.status === 'CONFIRMED';
-  const statusColor = isConfirmed ? '#2ECC71' : '#FF3B30';
-  const statusIcon = isConfirmed ? '✓' : '✗';
+  // Get status styling
+  const getStatusStyle = () => {
+    switch(booking.status) {
+      case 'CONFIRMED':
+        return {
+          container: styles.confirmedStatus,
+          text: styles.confirmedText,
+          icon: '✓'
+        };
+      case 'DECLINED':
+        return {
+          container: styles.declinedStatus,
+          text: styles.declinedText,
+          icon: '✗'
+        };
+      default:
+        return {
+          container: styles.pendingStatus,
+          text: styles.pendingText,
+          icon: '⋯'
+        };
+    }
+  };
+
+  const statusStyle = getStatusStyle();
 
   return (
     <LinearGradient
@@ -35,29 +57,25 @@ const BookingCard = ({ booking }) => {
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
     >
-      <View style={styles.cardContent}>
-        {/* Shop Info */}
-        <Text style={styles.shopName}>{booking.shopName}</Text>
+      {/* Shop Name */}
+      <Text style={styles.shopName}>{booking.shopName}</Text>
 
-        {/* Date & Time */}
-        <View style={styles.infoRow}>
-          <Feather name="calendar" size={16} color="#262525" />
-          <Text style={styles.infoText}>{formattedDate}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Feather name="clock" size={16} color="#262525" />
-          <Text style={styles.infoText}>{formattedTime}</Text>
-        </View>
+      {/* Date & Time */}
+      <View style={styles.infoRow}>
+        <Feather name="calendar" size={16} color="#262525" />
+        <Text style={styles.infoText}>{formattedDate}</Text>
+      </View>
 
-        {/* Status Badge */}
-        <View style={[
-          styles.statusContainer,
-          { backgroundColor: `${statusColor}10` }
-        ]}>
-          <Text style={[styles.statusText, { color: statusColor }]}>
-            {booking.status} {statusIcon}
-          </Text>
-        </View>
+      <View style={styles.infoRow}>
+        <Feather name="clock" size={16} color="#262525" />
+        <Text style={styles.infoText}>{formattedTime}</Text>
+      </View>
+
+      {/* Status Badge */}
+      <View style={[styles.statusBadge, statusStyle.container]}>
+        <Text style={[styles.statusText, statusStyle.text]}>
+          {booking.status} {statusStyle.icon}
+        </Text>
       </View>
     </LinearGradient>
   );
@@ -74,9 +92,6 @@ const ClientBookingsScreen = () => {
     loadBookings();
   }, []);
 
-  /**
-   * Load all bookings for the client
-   */
   const loadBookings = async () => {
     try {
       setLoading(true);
@@ -87,8 +102,8 @@ const ClientBookingsScreen = () => {
         return;
       }
 
-      const response = await bookingService.getBookings(token);
-      setBookings(response.myBookings);
+      const fetchedBookings = await bookingService.getBookings(token);
+      setBookings(fetchedBookings);
     } catch (error) {
       Alert.alert('Error', 'Failed to load bookings');
       console.error(error);
@@ -113,24 +128,24 @@ const ClientBookingsScreen = () => {
       <Text style={styles.headerTitle}>My Bookings</Text>
 
       {/* Bookings List */}
-      <ScrollView 
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {bookings.length > 0 ? (
-          bookings.map((booking) => (
+      {bookings.length > 0 ? (
+        <ScrollView 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {bookings.map((booking) => (
             <BookingCard key={booking._id} booking={booking} />
-          ))
-        ) : (
-          <View style={styles.emptyContainer}>
-            <Feather name="calendar" size={50} color="#C0C0C0" />
-            <Text style={styles.emptyText}>No bookings yet</Text>
-            <Text style={styles.emptySubtext}>
-              Your upcoming appointments will appear here
-            </Text>
-          </View>
-        )}
-      </ScrollView>
+          ))}
+        </ScrollView>
+      ) : (
+        <View style={styles.emptyContainer}>
+          <Feather name="calendar" size={50} color="#C0C0C0" />
+          <Text style={styles.emptyText}>No bookings yet</Text>
+          <Text style={styles.emptySubText}>
+            Your appointments will appear here after booking
+          </Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -141,6 +156,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     paddingTop: Platform.OS === 'ios' ? 60 : StatusBar.currentHeight + 20,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
   headerTitle: {
     fontFamily: 'BebasNeue-Regular',
     fontSize: 32,
@@ -148,24 +169,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 20,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-  },
   scrollContent: {
     padding: 20,
   },
   cardContainer: {
     borderRadius: 15,
     marginBottom: 15,
-    overflow: 'hidden',
+    padding: 15,
     borderWidth: 1,
     borderColor: '#E5E5E5',
-  },
-  cardContent: {
-    padding: 15,
   },
   shopName: {
     fontFamily: 'Poppins-Bold',
@@ -184,34 +196,52 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#262525',
   },
-  statusContainer: {
+  statusBadge: {
     alignSelf: 'flex-start',
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 20,
     marginTop: 5,
   },
+  confirmedStatus: {
+    backgroundColor: 'rgba(46, 204, 113, 0.1)',
+  },
+  declinedStatus: {
+    backgroundColor: 'rgba(255, 59, 48, 0.1)',
+  },
+  pendingStatus: {
+    backgroundColor: 'rgba(241, 196, 15, 0.1)',
+  },
   statusText: {
     fontFamily: 'Poppins-Bold',
     fontSize: 12,
   },
+  confirmedText: {
+    color: '#2ECC71',
+  },
+  declinedText: {
+    color: '#FF3B30',
+  },
+  pendingText: {
+    color: '#F1C40F',
+  },
   emptyContainer: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 50,
   },
   emptyText: {
     fontFamily: 'Poppins-Bold',
     fontSize: 18,
     color: '#262525',
     marginTop: 15,
-    marginBottom: 5,
   },
-  emptySubtext: {
+  emptySubText: {
     fontFamily: 'Poppins-Regular',
     fontSize: 14,
     color: '#666666',
     textAlign: 'center',
+    marginTop: 5,
   },
 });
 

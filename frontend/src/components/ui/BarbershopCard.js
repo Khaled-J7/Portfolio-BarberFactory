@@ -1,4 +1,3 @@
-// src/components/ui/BarbershopCard.js
 import React from "react";
 import {
   View,
@@ -18,7 +17,6 @@ const BarbershopCard = ({
   address,
   phone,
   imageUrl,
-  onBookPress,
   onPress,
 }) => {
   return (
@@ -27,35 +25,37 @@ const BarbershopCard = ({
       style={[styles.card, { overflow: "hidden" }]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      onTouchEnd={onPress}  // to avoid getting clicked if we press on the other parts of the card
     >
-      <View style={styles.contentContainer}>
+      <TouchableOpacity 
+        style={styles.contentContainer}
+        onPress={onPress}
+        activeOpacity={0.7}
+      >
         <View style={styles.textContainer}>
           <Text style={styles.shopName}>{shopName}</Text>
-
           <View style={styles.infoContainer}>
             <Feather name="map-pin" size={16} color="#03346E" />
             <Text style={styles.infoText}>{address}</Text>
           </View>
-
           <View style={styles.infoContainer}>
             <Feather name="phone" size={16} color="#03346E" />
             <Text style={styles.infoText}>{phone}</Text>
           </View>
-
-          <TouchableOpacity style={styles.bookButton} onPress={onBookPress}>
+          <TouchableOpacity 
+            style={styles.visitButton}
+            onPress={onPress}
+          >
             <LinearGradient
               colors={["#2ECC71", "#27AE60"]}
               style={styles.gradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
             >
-              <Text style={styles.buttonText}>Book Now</Text>
+              <Text style={styles.buttonText}>Visit Profile</Text>
               <Feather name="arrow-right" size={18} color="#FFFFFF" />
             </LinearGradient>
           </TouchableOpacity>
         </View>
-
         <View style={styles.imageContainer}>
           <Image
             source={{ uri: imageUrl }}
@@ -63,7 +63,7 @@ const BarbershopCard = ({
             resizeMode="cover"
           />
         </View>
-      </View>
+      </TouchableOpacity>
     </LinearGradient>
   );
 };
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     color: "#03346E",
     marginLeft: 8,
   },
-  bookButton: {
+  visitButton: {
     alignSelf: "flex-start",
     marginTop: 5,
   },

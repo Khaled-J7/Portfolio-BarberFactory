@@ -1,4 +1,3 @@
-// src/screens/main/HomeScreen.js
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -18,20 +17,24 @@ import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomDrawer from "../../components/navigation/CustomDrawer";
 import BarbershopCard from "../../components/ui/BarbershopCard";
+import BookingModal from "../booking/BookingModal";
 import shopService from "../../services/shopService";
 
 const HomeScreen = ({ navigation }) => {
-  // All declaration for Home Screen
+  // States
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [shops, setShops] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedShop, setSelectedShop] = useState(null);
+
+  // Load shops on mount
   useEffect(() => {
     loadShops();
   }, []);
 
+  // Load shops function
   const loadShops = async () => {
     try {
       setLoading(true);
@@ -42,7 +45,7 @@ const HomeScreen = ({ navigation }) => {
       }
 
       const allShops = await shopService.getAllShops(token);
-      console.log("Loaded shops:", allShops); // Debug log
+      console.log("Loaded shops:", allShops);
       setShops(allShops);
     } catch (error) {
       console.error("Error loading shops:", error);
@@ -52,25 +55,32 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
-  // Book Button
-  const handleBookPress = (shop) => {
-    setSelectedShop(shop);
-    setShowBookingModal(true);
+  // Handle booking button press
+  const handleBookPress = (shopId) => {
+    console.log('Book pressed for shop:', shopId);
+    const shop = shops.find(shop => shop._id === shopId);
+    if (shop) {
+      setSelectedShop(shop);
+      setShowBookingModal(true);
+    }
   };
 
+  // Handle shop card press
   const handleShopPress = (shop) => {
-    console.log("Navigating to shop with data:", shop); // debug log
     navigation.navigate("ViewBarberProfile", {
-      shopData: {
-        coverImage: shop.coverImage,
-        name: shop.name,
-        phone: shop.phone,
-        address: shop.address,
-        galleryImages: shop.galleryImages || [],
-      },
+        shopData: {
+            _id: shop._id,
+            owner: shop.owner, // Make sure this is passed
+            coverImage: shop.coverImage,
+            name: shop.name,
+            phone: shop.phone,
+            address: shop.address,
+            galleryImages: shop.galleryImages || [],
+        },
     });
-  };
-  // Pull-To-Refresh Feature
+};
+
+  // Pull-To-Refresh functionality
   const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
     try {
@@ -109,7 +119,7 @@ const HomeScreen = ({ navigation }) => {
       {/* Title */}
       <Text style={styles.title}>Discover nearby Barbershops</Text>
 
-      {/* Updating ScrollView to integrate Pull-To-Refresh feature */}
+      {/* Shops List */}
       <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}
@@ -117,10 +127,10 @@ const HomeScreen = ({ navigation }) => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#2ECC71"]} // Android
-            tintColor="#2ECC71" // iOS
-            title="Pull to refresh" // iOS
-            titleColor="#2ECC71" // iOS
+            colors={["#2ECC71"]}
+            tintColor="#2ECC71"
+            title="Pull to refresh"
+            titleColor="#2ECC71"
           />
         }
       >
@@ -155,9 +165,15 @@ const HomeScreen = ({ navigation }) => {
         onClose={() => setIsDrawerVisible(false)}
         navigation={navigation}
       />
+
+      {/* Booking Modal */}
       <BookingModal
         visible={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
+        onClose={() => {
+          console.log('Closing booking modal');
+          setShowBookingModal(false);
+          setSelectedShop(null);
+        }}
         shopData={selectedShop}
       />
     </SafeAreaView>
@@ -179,7 +195,7 @@ const styles = StyleSheet.create({
   },
   iconButton: {
     padding: 10,
-    backgroundColor: "#F8F8F8", // Light background for visibility
+    backgroundColor: "#F8F8F8",
     borderRadius: 10,
     shadowColor: "#000",
     shadowOffset: {
@@ -221,6 +237,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#666666",
     textAlign: "center",
+  },
+  loader: {
+    marginTop: 20,
   },
 });
 
