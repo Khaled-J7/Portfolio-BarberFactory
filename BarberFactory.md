@@ -208,9 +208,6 @@ PUT /api/client/update  - Update client profile
 - Body: Poppins-Regular
 - Bold Text: Poppins-Bold
 
-## App Screenshots
-
-[Your screenshots will go here]
 
 ## Contributing
 
