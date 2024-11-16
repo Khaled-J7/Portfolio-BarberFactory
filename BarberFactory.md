@@ -8,6 +8,23 @@
 
 BarberFactory is a mobile application that connects clients with barbers, enabling easy barbershop discovery and appointment booking. The app provides a seamless experience for both clients looking for haircuts and barbers managing their businesses.
 
+## App Screenshots
+
+<div align="center">
+  <h3>Main Screens</h3>
+  <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin-bottom: 30px;">
+    <img src="frontend/src/assets/screenshots/HomeScreen.png" alt="Home Screen" width="200" />
+    <img src="frontend/src/assets/screenshots/ExploreScreen.png" alt="Explore Screen" width="200" />
+    <img src="frontend/src/assets/screenshots/BarberProfileScreen.png" alt="Barber Profile" width="200" />
+  </div>
+
+  <h3>Booking & Settings</h3>
+  <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
+    <img src="frontend/src/assets/screenshots/BookingsScreen.png" alt="Bookings Management" width="200" />
+    <img src="frontend/src/assets/screenshots/SettingsScreen.png" alt="Settings Screen" width="200" />
+  </div>
+</div>
+
 ## Features
 
 ### For Clients
