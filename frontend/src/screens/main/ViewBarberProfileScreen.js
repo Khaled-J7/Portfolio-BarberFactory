@@ -27,29 +27,34 @@ const ViewBarberProfileScreen = ({ route, navigation }) => {
   }, []);
 
   /**
-   * Check if current user is the shop owner
+   * Determines if current user is the owner of the viewed shop
+   * Controls visibility of "Book Now" button
    */
   const checkOwnership = async () => {
     try {
-      const userData = await AsyncStorage.getItem("userData");
+      const userData = await AsyncStorage.getItem("userData");  // userData from AsyncStorage (contains current user info)
       if (userData) {
         const parsedData = JSON.parse(userData);
-        console.log("Current user data:", parsedData);
-        console.log("Shop data:", shopData);
+        console.log("Current user data:", parsedData); // Debug
+        console.log("Shop data:", shopData);  // Debug
 
         // Compare user ID with shop owner ID
-        if (shopData.owner) {
+        if (shopData.owner) { // shopData from route.params (contains shop info including owner ID)
+          
+          // Compare current user ID with shop owner ID
           const isOwner = parsedData.id === shopData.owner;
           console.log("Is owner check:", isOwner);
+          // Update state based on comparison
           setIsShopOwner(isOwner);
         } else {
           console.log("Shop owner ID not found in shop data");
+          // If no owner field, assume not owner
           setIsShopOwner(false);
         }
       }
     } catch (error) {
       console.error("Error checking ownership:", error);
-      setIsShopOwner(false);
+      setIsShopOwner(false);  // On any error, assume not owner
     }
   };
 

@@ -58,6 +58,7 @@ export default function CreateShopScreen({ navigation }) {
   });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  // Pick Image from local Device Storage 
   const pickImage = async (type) => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -85,6 +86,7 @@ export default function CreateShopScreen({ navigation }) {
     }
   };
 
+  // Upload images from Device Camera
   const takePhoto = async () => {
     try {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -158,7 +160,7 @@ export default function CreateShopScreen({ navigation }) {
         token
       );
 
-      console.log("Shop created successfully:", createdShop); // debug
+      console.log("Shop created successfully:", createdShop); // Debug
 
       if (!createdShop) {
         throw new Error("No data received from shop creation");
@@ -173,7 +175,7 @@ export default function CreateShopScreen({ navigation }) {
       console.error("Shop creation error:", error); // debug
       Alert.alert(
         "Error",
-        error.message || "Failed to create shop profile. Please try again."
+        error.message || "Failed to create shop profile. Please try again." // Fallback String
       );
     }
   };
@@ -319,7 +321,7 @@ export default function CreateShopScreen({ navigation }) {
             }
             // Get the latest shop data from backend
             const shopData = await shopService.getShopProfile(token);
-            console.log("Retrieved shop data before navigation:", shopData); // debug
+            console.log("Retrieved shop data before navigation:", shopData); // Debug
             setShowSuccessModal(false);
 
             // New navigation way
@@ -328,7 +330,7 @@ export default function CreateShopScreen({ navigation }) {
               params: { shopData },
             });
           } catch (error) {
-            console.error("Navigation error:", error); // debug
+            console.error("Navigation error:", error); // Debug
             Alert.alert("Error", "Failed to load shop profile");
             // Navigate anyway with local data as fallback
             navigation.replace("MainApp", {

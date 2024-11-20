@@ -17,7 +17,6 @@ import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomDrawer from "../../components/navigation/CustomDrawer";
 import BarbershopCard from "../../components/ui/BarbershopCard";
-import BookingModal from "../booking/BookingModal";
 import shopService from "../../services/shopService";
 
 const HomeScreen = ({ navigation }) => {
@@ -26,8 +25,6 @@ const HomeScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [shops, setShops] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [selectedShop, setSelectedShop] = useState(null);
 
   // Load shops on mount
   useEffect(() => {
@@ -45,23 +42,13 @@ const HomeScreen = ({ navigation }) => {
       }
 
       const allShops = await shopService.getAllShops(token);
-      console.log("Loaded shops:", allShops);
+      console.log("Loaded shops:", allShops); // Debug
       setShops(allShops);
     } catch (error) {
       console.error("Error loading shops:", error);
       Alert.alert("Error", "Failed to load barbershops");
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Handle booking button press
-  const handleBookPress = (shopId) => {
-    console.log('Book pressed for shop:', shopId);
-    const shop = shops.find(shop => shop._id === shopId);
-    if (shop) {
-      setSelectedShop(shop);
-      setShowBookingModal(true);
     }
   };
 
@@ -164,17 +151,6 @@ const HomeScreen = ({ navigation }) => {
         isVisible={isDrawerVisible}
         onClose={() => setIsDrawerVisible(false)}
         navigation={navigation}
-      />
-
-      {/* Booking Modal */}
-      <BookingModal
-        visible={showBookingModal}
-        onClose={() => {
-          console.log('Closing booking modal');
-          setShowBookingModal(false);
-          setSelectedShop(null);
-        }}
-        shopData={selectedShop}
       />
     </SafeAreaView>
   );

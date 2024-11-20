@@ -26,23 +26,23 @@ const authService = {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(userData),
+        body: JSON.stringify(userData), // Converts userData to JSON format
       });
 
       // DEBUG: Log response status
       console.log('Response status:', response.status);
-      const data = await response.json();
+      const data = await response.json(); // Extracts JSON data from the response
       console.log('Response data:', data);
 
       if (!response.ok) {
         throw new Error(data.message || 'Registration failed');
       }
 
-      return data;
+      return data;  // Returns the API response to the caller (LoginSignupScreen)
     } catch (error) {
       // DEBUG: Log registration error
       console.error('Registration error:', error);
-      throw error;
+      throw error;  // Re-throws the error for further handling (caught in LoginSignupScreen)
     }
   },
 
@@ -76,11 +76,11 @@ const authService = {
         throw new Error(data.message || 'Login failed');
       }
 
-      return data;
+      return data;  // This returns to LoginSignupScreen
     } catch (error) {
       // DEBUG: Log login error
       console.error('Login error:', error);
-      throw error;
+      throw error;  // Re-throws the error for further handling: This error is caught in LoginSignupScreen
     }
   },
 
@@ -94,7 +94,7 @@ const authService = {
         }
       });
 
-      const data = await response.json();
+      const data = await response.json();  // Coming from authcontroller.deleteAccount
       
       if (!response.ok) {
         throw new Error(data.message || 'Failed to delete account');
@@ -103,7 +103,7 @@ const authService = {
       return data;
     } catch (error) {
       console.error('Delete account error:', error);
-      throw error;
+      throw error;  // Re-throws the error for further handling
     }
   }
 };

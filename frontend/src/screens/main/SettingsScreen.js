@@ -86,6 +86,7 @@ const SettingsScreen = ({ navigation }) => {
         type="delete"
         onConfirm={async () => {
           try {
+            // Get token for authentication
             const token = await AsyncStorage.getItem("userToken");
             if (!token) {
               Alert.alert("Error", "Authentication required");

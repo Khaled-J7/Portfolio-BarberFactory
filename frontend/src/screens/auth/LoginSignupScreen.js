@@ -156,7 +156,7 @@ const SuccessModal = ({ visible, onClose }) => (
 
 // Main Component
 const LoginSignupScreen = ({ navigation }) => {
-  // State Management
+  // State Management : When user enters registration form
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -232,20 +232,26 @@ const LoginSignupScreen = ({ navigation }) => {
           phoneNumber: formData.phoneNumber,
           password: formData.password,
         });
+        // Store authentication data locally : maintaining user sessions
+        // stores the JWT (JSON Web Token) received from the server
         await AsyncStorage.setItem("userToken", response.token);
+        // Stores user information locally for quick access
         await AsyncStorage.setItem("userData", JSON.stringify(response.user));
 
         // For login, go directly to MainApp
         navigation.replace("MainApp");
       } else {
-        // Registration
+        // if we're in registration mode (not login)
         response = await authService.register({
           fullName: formData.fullName,
           phoneNumber: formData.phoneNumber,
           password: formData.password,
           isBarber: formData.role === "barber", // Convert role to boolean
         });
+        // Store authentication data locally : maintaining user sessions
+        // stores the JWT (JSON Web Token) received from the server
         await AsyncStorage.setItem("userToken", response.token);
+        // Stores user information locally for quick access
         await AsyncStorage.setItem("userData", JSON.stringify(response.user));
 
         if (formData.role === 'barber') {

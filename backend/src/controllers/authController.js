@@ -28,7 +28,7 @@ const authController = {
    */
   register: async (req, res) => {
     try {
-      const { fullName, phoneNumber, password, isBarber } = req.body;
+      const { fullName, phoneNumber, password, isBarber } = req.body; // Extract data from the request body
 
       // DEBUG: Log registration attempt
       console.log('Registration attempt:', { fullName, phoneNumber, isBarber  });
@@ -49,13 +49,14 @@ const authController = {
         isBarber: Boolean(isBarber) // To ensure Boolean value 
       });
 
+      // After coming back from the Model Layer
       // Generate token
       const token = generateToken(user._id);
 
       // DEBUG: Log successful registration
       console.log('User registered successfully:', user._id, 'isBarber:', user.isBarber);
 
-      // Send response
+      // Send response ( to authService to process it)
       res.status(201).json({
         token,
         user: {
@@ -105,13 +106,14 @@ const authController = {
         return res.status(401).json({ message: 'Invalid credentials' });
       }
 
+      // After coming back from the Model Layer
       // Generate token
       const token = generateToken(user._id);
 
       // DEBUG: Log successful login
       console.log('Login successful for user:', user._id);
 
-      // Send response
+      // Send response ( to authService to process it)
       res.json({
         token,
         user: {
